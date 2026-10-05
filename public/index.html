@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Home Assistant - Panel de Dispositivos</title>
+  <title>Smart Hub - Home Assistant & OpenTraxx GPS</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons CDN -->
@@ -23,16 +23,16 @@
     <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
       <div class="flex items-center gap-3">
         <div class="p-2.5 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 text-white shadow-lg shadow-sky-500/20">
-          <i data-lucide="layout-grid" class="w-6 h-6"></i>
+          <i data-lucide="layers" class="w-6 h-6"></i>
         </div>
         <div>
           <div class="flex items-center gap-2">
-            <h1 class="font-bold text-lg leading-tight tracking-tight">Panel por Dispositivos</h1>
-            <span class="px-2 py-0.5 text-[10px] font-semibold tracking-wider uppercase rounded bg-sky-500/10 text-sky-400 border border-sky-500/20">
-              Entidades Habilitadas
+            <h1 class="font-bold text-lg leading-tight tracking-tight">Hub de Dispositivos Multi-Plataforma</h1>
+            <span class="px-2 py-0.5 text-[10px] font-semibold tracking-wider uppercase rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+              HA + 808GPS
             </span>
           </div>
-          <p class="text-xs text-slate-400" id="header-subtitle">Cargando dispositivos de Home Assistant...</p>
+          <p class="text-xs text-slate-400" id="header-subtitle">Cargando dispositivos...</p>
         </div>
       </div>
 
@@ -40,8 +40,8 @@
       <div class="flex items-center gap-3">
         <button 
           id="btn-sync" 
-          onclick="syncWithHA()" 
-          title="Sincronizar cambios de entidades desde Home Assistant" 
+          onclick="syncCurrentTab()" 
+          title="Sincronizar cambios desde ambas APIs" 
           class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-xs text-slate-300 border border-slate-700/60 transition-all cursor-pointer active:scale-95"
         >
           <i id="sync-icon" data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
@@ -54,13 +54,74 @@
         </div>
       </div>
     </div>
+
+    <!-- SELECTOR DE LOS 2 APARTADOS (PESTAÑAS) -->
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 pt-1 pb-3">
+      <div class="flex items-center gap-2 p-1 rounded-xl bg-slate-900/80 border border-slate-800/80 w-fit">
+        <button 
+          id="tab-btn-ha" 
+          onclick="switchTab('ha')" 
+          class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer bg-sky-500 text-white shadow-sm"
+        >
+          <i data-lucide="home" class="w-4 h-4"></i>
+          <span>1. Domótica IoT (Home Assistant)</span>
+          <span id="badge-ha-count" class="px-1.5 py-0.2 rounded-full bg-sky-600 text-[10px]">0</span>
+        </button>
+
+        <button 
+          id="tab-btn-otx" 
+          onclick="switchTab('otx')" 
+          class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition-all cursor-pointer"
+        >
+          <i data-lucide="navigation" class="w-4 h-4"></i>
+          <span>2. Flota & Telemetría GPS (OpenTraxx)</span>
+          <span id="badge-otx-count" class="px-1.5 py-0.2 rounded-full bg-slate-800 text-[10px]">0</span>
+        </button>
+
+        <button 
+          id="tab-btn-both" 
+          onclick="switchTab('both')" 
+          class="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition-all cursor-pointer"
+        >
+          <i data-lucide="columns" class="w-3.5 h-3.5"></i>
+          <span>Ver Ambos</span>
+        </button>
+      </div>
+    </div>
   </header>
 
-  <!-- CONTENIDO: APARTADOS POR DISPOSITIVO -->
-  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8">
-    <div id="devices-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <!-- Los apartados de dispositivos se generan aquí dinámicamente -->
-    </div>
+  <!-- CONTENIDO PRINCIPAL: APARTADOS -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 space-y-8">
+
+    <!-- APARTADO 1: HOME ASSISTANT -->
+    <section id="section-ha" class="space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
+        <div class="flex items-center gap-2">
+          <i data-lucide="cpu" class="w-5 h-5 text-sky-400"></i>
+          <h2 class="text-base font-bold text-slate-100 uppercase tracking-wider">Apartado 1: Dispositivos IoT (Home Assistant)</h2>
+        </div>
+        <span class="text-xs text-slate-400">Conexión Docker :3000</span>
+      </div>
+
+      <div id="devices-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Los apartados de Home Assistant se renderizan aquí -->
+      </div>
+    </section>
+
+    <!-- APARTADO 2: OPENTRAXX (808GPS) -->
+    <section id="section-otx" class="space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
+        <div class="flex items-center gap-2">
+          <i data-lucide="map-pin" class="w-5 h-5 text-emerald-400"></i>
+          <h2 class="text-base font-bold text-slate-100 uppercase tracking-wider">Apartado 2: Flota & GPS (OpenTraxx 808GPS)</h2>
+        </div>
+        <span class="text-xs text-slate-400" id="otx-sync-time">Último reporte en nube</span>
+      </div>
+
+      <div id="vehicles-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Los vehículos de OpenTraxx se renderizan aquí -->
+      </div>
+    </section>
 
     <!-- NOTIFICACIÓN TOAST -->
     <div id="toast" class="fixed bottom-6 right-6 px-4 py-3 rounded-xl bg-slate-800/90 border border-slate-700 text-slate-200 text-sm shadow-2xl backdrop-blur transform translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-2 pointer-events-none z-50">
