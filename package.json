@@ -1,0 +1,22 @@
+{
+  "name": "homeasis",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "test-conn": "node src/test-connection.js",
+    "fetch-states": "node src/fetch-states.js",
+    "listen-events": "node src/listen-events.js",
+    "test-service": "node src/test-service.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.4",
+    "express": "^5.2.1",
+    "ws": "^8.22.0"
+  }
+}

@@ -1,0 +1,16 @@
+# Dependencias
+node_modules/
+
+# Variables de entorno y credenciales sensibles (¡Nunca subir a GitHub!)
+.env
+
+# Archivos de volcado temporal
+data/
+
+# Logs del sistema
+*.log
+npm-debug.log*
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
