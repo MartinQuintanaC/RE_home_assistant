@@ -1,7 +1,4 @@
-// Estado local en memoria del cliente
 let devicesList = [];
-let vehiclesList = [];
-let activeTab = 'ha'; // 'ha', 'otx', 'both'
 
 function refreshIcons() {
   if (window.lucide) {
@@ -77,7 +74,7 @@ function renderDevices() {
   container.innerHTML = devicesList.map((device) => {
     const isPhone = device.manufacturer?.toLowerCase().includes('vivo') || device.name?.toLowerCase().includes('v2314') || device.model?.toLowerCase().includes('v2314');
     const isRoku = device.name?.toLowerCase().includes('roku') || device.manufacturer?.toLowerCase().includes('roku');
-    
+
     let deviceIcon = 'cpu';
     if (isPhone) deviceIcon = 'smartphone';
     else if (isRoku) deviceIcon = 'tv';
@@ -226,8 +223,8 @@ function renderVehicles() {
 
   container.innerHTML = vehiclesList.map((vehi) => {
     const isOnline = vehi.isOnline;
-    const badgeClass = isOnline 
-      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' 
+    const badgeClass = isOnline
+      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
       : 'bg-rose-500/20 text-rose-400 border border-rose-500/30';
 
     return `

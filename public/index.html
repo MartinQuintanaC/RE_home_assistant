@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es" class="dark">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,19 +17,23 @@
     }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-sky-500 selection:text-white">
+
+<body
+  class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-sky-500 selection:text-white">
 
   <!-- BARRA SUPERIOR -->
   <header class="border-b border-slate-800/80 bg-slate-900/60 backdrop-blur sticky top-0 z-50">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <div class="p-2.5 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 text-white shadow-lg shadow-sky-500/20">
+        <div
+          class="p-2.5 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 text-white shadow-lg shadow-sky-500/20">
           <i data-lucide="layers" class="w-6 h-6"></i>
         </div>
         <div>
           <div class="flex items-center gap-2">
             <h1 class="font-bold text-lg leading-tight tracking-tight">Hub de Dispositivos Multi-Plataforma</h1>
-            <span class="px-2 py-0.5 text-[10px] font-semibold tracking-wider uppercase rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+            <span
+              class="px-2 py-0.5 text-[10px] font-semibold tracking-wider uppercase rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
               HA + 808GPS
             </span>
           </div>
@@ -38,17 +43,14 @@
 
       <!-- Acciones de cabecera -->
       <div class="flex items-center gap-3">
-        <button 
-          id="btn-sync" 
-          onclick="syncCurrentTab()" 
-          title="Sincronizar cambios desde ambas APIs" 
-          class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-xs text-slate-300 border border-slate-700/60 transition-all cursor-pointer active:scale-95"
-        >
+        <button id="btn-sync" onclick="syncCurrentTab()" title="Sincronizar cambios desde ambas APIs"
+          class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-xs text-slate-300 border border-slate-700/60 transition-all cursor-pointer active:scale-95">
           <i id="sync-icon" data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
           <span class="hidden sm:inline">Sincronizar</span>
         </button>
 
-        <div id="connection-badge" class="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-emerald-950/80 text-emerald-400 border border-emerald-800/60 shadow-sm transition-all duration-300">
+        <div id="connection-badge"
+          class="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-emerald-950/80 text-emerald-400 border border-emerald-800/60 shadow-sm transition-all duration-300">
           <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
           <span id="connection-text">En Vivo</span>
         </div>
@@ -58,31 +60,22 @@
     <!-- SELECTOR DE LOS 2 APARTADOS (PESTAÑAS) -->
     <div class="max-w-6xl mx-auto px-4 sm:px-6 pt-1 pb-3">
       <div class="flex items-center gap-2 p-1 rounded-xl bg-slate-900/80 border border-slate-800/80 w-fit">
-        <button 
-          id="tab-btn-ha" 
-          onclick="switchTab('ha')" 
-          class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer bg-sky-500 text-white shadow-sm"
-        >
+        <button id="tab-btn-ha" onclick="switchTab('ha')"
+          class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer bg-sky-500 text-white shadow-sm">
           <i data-lucide="home" class="w-4 h-4"></i>
           <span>1. Domótica IoT (Home Assistant)</span>
           <span id="badge-ha-count" class="px-1.5 py-0.2 rounded-full bg-sky-600 text-[10px]">0</span>
         </button>
 
-        <button 
-          id="tab-btn-otx" 
-          onclick="switchTab('otx')" 
-          class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition-all cursor-pointer"
-        >
+        <button id="tab-btn-otx" onclick="switchTab('otx')"
+          class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
           <i data-lucide="navigation" class="w-4 h-4"></i>
           <span>2. Flota & Telemetría GPS (OpenTraxx)</span>
           <span id="badge-otx-count" class="px-1.5 py-0.2 rounded-full bg-slate-800 text-[10px]">0</span>
         </button>
 
-        <button 
-          id="tab-btn-both" 
-          onclick="switchTab('both')" 
-          class="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition-all cursor-pointer"
-        >
+        <button id="tab-btn-both" onclick="switchTab('both')"
+          class="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
           <i data-lucide="columns" class="w-3.5 h-3.5"></i>
           <span>Ver Ambos</span>
         </button>
@@ -98,7 +91,8 @@
       <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
         <div class="flex items-center gap-2">
           <i data-lucide="cpu" class="w-5 h-5 text-sky-400"></i>
-          <h2 class="text-base font-bold text-slate-100 uppercase tracking-wider">Apartado 1: Dispositivos IoT (Home Assistant)</h2>
+          <h2 class="text-base font-bold text-slate-100 uppercase tracking-wider">Apartado 1: Dispositivos IoT (Home
+            Assistant)</h2>
         </div>
         <span class="text-xs text-slate-400">Conexión Docker :3000</span>
       </div>
@@ -113,7 +107,8 @@
       <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
         <div class="flex items-center gap-2">
           <i data-lucide="map-pin" class="w-5 h-5 text-emerald-400"></i>
-          <h2 class="text-base font-bold text-slate-100 uppercase tracking-wider">Apartado 2: Flota & GPS (OpenTraxx 808GPS)</h2>
+          <h2 class="text-base font-bold text-slate-100 uppercase tracking-wider">Apartado 2: Flota & GPS (OpenTraxx
+            808GPS)</h2>
         </div>
         <span class="text-xs text-slate-400" id="otx-sync-time">Último reporte en nube</span>
       </div>
@@ -124,7 +119,8 @@
     </section>
 
     <!-- NOTIFICACIÓN TOAST -->
-    <div id="toast" class="fixed bottom-6 right-6 px-4 py-3 rounded-xl bg-slate-800/90 border border-slate-700 text-slate-200 text-sm shadow-2xl backdrop-blur transform translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-2 pointer-events-none z-50">
+    <div id="toast"
+      class="fixed bottom-6 right-6 px-4 py-3 rounded-xl bg-slate-800/90 border border-slate-700 text-slate-200 text-sm shadow-2xl backdrop-blur transform translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-2 pointer-events-none z-50">
       <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
       <span id="toast-msg">Actualizado</span>
     </div>
@@ -132,4 +128,5 @@
 
   <script src="/app.js"></script>
 </body>
+
 </html>

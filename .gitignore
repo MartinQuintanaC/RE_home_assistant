@@ -1,16 +1,7 @@
-# Variables de entorno y credenciales sensibles (¡Nunca subir a GitHub!)
-.env
-
-# Dependencias de Node
 node_modules/
-
-# Archivos temporales o volcados de datos
+.env
 data/
-
-# Logs del sistema
 *.log
 npm-debug.log*
-
-# Archivos del sistema operativo
 .DS_Store
 Thumbs.db
