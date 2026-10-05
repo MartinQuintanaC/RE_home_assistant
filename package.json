@@ -7,7 +7,8 @@
     "test-conn": "node src/test-connection.js",
     "fetch-states": "node src/fetch-states.js",
     "listen-events": "node src/listen-events.js",
-    "test-service": "node src/test-service.js"
+    "test-service": "node src/test-service.js",
+    "test-opentraxx": "node src/test-opentraxx.js"
   },
   "keywords": [],
   "author": "",
