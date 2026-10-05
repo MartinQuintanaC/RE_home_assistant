@@ -1,0 +1,620 @@
+[
+  {
+    "entity_id": "conversation.home_assistant",
+    "state": "unknown",
+    "attributes": {
+      "friendly_name": "Home Assistant",
+      "supported_features": 1
+    },
+    "last_changed": "2026-09-28T18:01:07.633503+00:00",
+    "last_reported": "2026-09-28T18:01:07.633503+00:00",
+    "last_updated": "2026-09-28T18:01:07.633503+00:00",
+    "context": {
+      "id": "01M3MJTZ9HM6W9RAQE31NQVSY3",
+      "parent_id": null,
+      "user_id": null
+    }
+  },
+  {
+    "entity_id": "event.backup_automatic_backup",
+    "state": "unknown",
+    "attributes": {
+      "event_types": [
+        "completed",
+        "failed",
+        "in_progress"
+      ],
+      "event_type": null,
+      "friendly_name": "Backup Copia de seguridad automática"
+    },
+    "last_changed": "2026-09-28T18:01:07.677901+00:00",
+    "last_reported": "2026-09-28T18:01:07.677901+00:00",
+    "last_updated": "2026-09-28T18:01:07.677901+00:00",
+    "context": {
+      "id": "01M3MJTZAXR4E3TF7HDPJJTFWB",
+      "parent_id": null,
+      "user_id": null
+    }
+  },
+  {
+    "entity_id": "sensor.backup_backup_manager_state",
+    "state": "idle",
+    "attributes": {
+      "options": [
+        "idle",
+        "create_backup",
+        "blocked",
+        "receive_backup",
+        "restore_backup"
+      ],
+      "device_class": "enum",
+      "friendly_name": "Backup Estado del administrador de copias de seguridad"
+    },
+    "last_changed": "2026-09-28T18:01:09.757646+00:00",
+    "last_reported": "2026-09-28T18:01:09.757646+00:00",
+    "last_updated": "2026-09-28T18:01:09.757646+00:00",
+    "context": {
+      "id": "01M3MJV1BXSNAJMH89HD96G5WE",
+      "parent_id": null,
+      "user_id": null
+    }
+  },
+  {
+    "entity_id": "sensor.backup_next_scheduled_automatic_backup",
+    "state": "unknown",
+    "attributes": {
+      "device_class": "timestamp",
+      "friendly_name": "Backup Próxima copia de seguridad automática programada"
+    },
+    "last_changed": "2026-09-28T18:01:07.678612+00:00",
+    "last_reported": "2026-09-28T18:01:09.757673+00:00",
+    "last_updated": "2026-09-28T18:01:07.678612+00:00",
+    "context": {
+      "id": "01M3MJTZAYZ479BS62QC07F2J2",
+      "parent_id": null,
+      "user_id": null
+    }
+  },
+  {
+    "entity_id": "sensor.backup_last_successful_automatic_backup",
+    "state": "unknown",
+    "attributes": {
+      "device_class": "timestamp",
+      "friendly_name": "Backup Última copia de seguridad automática realizada correctamente"
+    },
+    "last_changed": "2026-09-28T18:01:07.678731+00:00",
+    "last_reported": "2026-09-28T18:01:09.757684+00:00",
+    "last_updated": "2026-09-28T18:01:07.678731+00:00",
+    "context": {
+      "id": "01M3MJTZAYFQFED6J1MQFYJGX9",
+      "parent_id": null,
+      "user_id": null
+    }
+  },
+  {
+    "entity_id": "sensor.backup_last_attempted_automatic_backup",
+    "state": "unknown",
+    "attributes": {
+      "device_class": "timestamp",
+      "friendly_name": "Backup Último intento de copia de seguridad automática"
+    },
+    "last_changed": "2026-09-28T18:01:07.678890+00:00",
+    "last_reported": "2026-09-28T18:01:09.757694+00:00",
+    "last_updated": "2026-09-28T18:01:07.678890+00:00",
+    "context": {
+      "id": "01M3MJTZAYT420YMFM7QHXNK79",
+      "parent_id": null,
+      "user_id": null
+    }
+  },
+  {
+    "entity_id": "zone.home",
+    "state": "0",
+    "attributes": {
+      "latitude": -34.15015437109358,
+      "longitude": -70.71145444963902,
+      "radius": 100,
+      "passive": false,
+      "persons": [],
+      "editable": true,
+      "icon": "mdi:home",
+      "friendly_name": "Casa"
+    },
+    "last_changed": "2026-09-28T18:01:08.022765+00:00",
+    "last_reported": "2026-09-28T18:01:08.022765+00:00",
+    "last_updated": "2026-09-28T18:01:08.022765+00:00",
+    "context": {
+      "id": "01M3MJTZNPG6T51C0EQZASSFJC",
+      "parent_id": null,
+      "user_id": null
+    }
+  },
+  {
+    "entity_id": "person.martin_quintana",
+    "state": "unknown",
+    "attributes": {
+      "editable": true,
+      "id": "martin_quintana",
+      "device_trackers": [
+        "device_tracker.vivo_v30"
+      ],
+      "in_zones": [],
+      "user_id": "d6c9b19951fe4214a63d51ab3943b095",
+      "friendly_name": "martin quintana"
+    },
+    "last_changed": "2026-09-28T18:01:08.042081+00:00",
+    "last_reported": "2026-09-28T18:01:09.756587+00:00",
+    "last_updated": "2026-09-28T18:01:09.756587+00:00",
+    "context": {
+      "id": "01M3MJV1BW9AYXGD33VAAYJS6D",
+      "parent_id": null,
+      "user_id": null
+    }
+  },
+  {
+    "entity_id": "sun.sun",
+    "state": "above_horizon",
+    "attributes": {
+      "next_dawn": "2026-09-29T09:57:02.463397+00:00",
+      "next_dusk": "2026-09-28T23:09:01.687574+00:00",
+      "next_midnight": "2026-09-29T04:33:06+00:00",
+      "next_noon": "2026-09-29T16:33:20+00:00",
+      "next_rising": "2026-09-29T10:22:34.781999+00:00",
+      "next_setting": "2026-09-28T22:43:27.243086+00:00",
+      "elevation": 51.6,
+      "azimuth": 321.21,
+      "rising": false,
+      "friendly_name": "Sun"
+    },
+    "last_changed": "2026-09-28T18:01:08.509333+00:00",
+    "last_reported": "2026-09-28T18:05:08.531815+00:00",
+    "last_updated": "2026-09-28T18:05:08.510917+00:00",
+    "context": {
+      "id": "01M3MK2AGY0KVBR088PGFH6TNV",
+      "parent_id": null,
+      "user_id": null
+    }
+  },
+  {
+    "entity_id": "sensor.sun_next_dawn",
+    "state": "2026-09-29T09:57:02+00:00",
+    "attributes": {
+      "device_class": "timestamp",
+      "friendly_name": "Sun Próximo amanecer"
+    },
+    "last_changed": "2026-09-28T18:01:08.509952+00:00",
+    "last_reported": "2026-09-28T18:01:08.509952+00:00",
+    "last_updated": "2026-09-28T18:01:08.509952+00:00",
+    "context": {
+      "id": "01M3MJV04X4FDX2ZYVN4FXP70Y",
+      "parent_id": null,
+      "user_id": null
+    }
+  },
+  {
+    "entity_id": "sensor.sun_next_dusk",
+    "state": "2026-09-28T23:09:01+00:00",
+    "attributes": {
+      "device_class": "timestamp",
+      "friendly_name": "Sun Próximo anochecer"
+    },
+    "last_changed": "2026-09-28T18:01:08.510100+00:00",
+    "last_reported": "2026-09-28T18:01:08.510100+00:00",
+    "last_updated": "2026-09-28T18:01:08.510100+00:00",
+    "context": {
+      "id": "01M3MJV04YW0S7SQJM966WNKNP",
+      "parent_id": null,
+      "user_id": null
+    }
+  },
+  {
+    "entity_id": "sensor.sun_next_midnight",
+    "state": "2026-09-29T04:33:06+00:00",
+    "attributes": {
+      "device_class": "timestamp",
+      "friendly_name": "Sun Próxima medianoche"
+    },
+    "last_changed": "2026-09-28T18:01:08.510396+00:00",
+    "last_reported": "2026-09-28T18:01:08.510396+00:00",
+    "last_updated": "2026-09-28T18:01:08.510396+00:00",
+    "context": {
+      "id": "01M3MJV04Y5EH10JKNF5D4KDDS",
+      "parent_id": null,
+      "user_id": null
+    }
+  },
+  {
+    "entity_id": "sensor.sun_next_noon",
+    "state": "2026-09-29T16:33:20+00:00",
+    "attributes": {
+      "device_class": "timestamp",
+      "friendly_name": "Sun Próximo mediodía"
+    },
+    "last_changed": "2026-09-28T18:01:08.510562+00:00",
+    "last_reported": "2026-09-28T18:01:08.510562+00:00",
+    "last_updated": "2026-09-28T18:01:08.510562+00:00",
+    "context": {
+      "id": "01M3MJV04Y2SZA364ZDY9H76E0",
+      "parent_id": null,
+      "user_id": null
+    }
+  },
+  {
+    "entity_id": "sensor.sun_next_rising",
+    "state": "2026-09-29T10:22:34+00:00",
+    "attributes": {
+      "device_class": "timestamp",
+      "friendly_name": "Sun Próxima salida del sol"
+    },
+    "last_changed": "2026-09-28T18:01:08.510698+00:00",
+    "last_reported": "2026-09-28T18:01:08.510698+00:00",
+    "last_updated": "2026-09-28T18:01:08.510698+00:00",
+    "context": {
+      "id": "01M3MJV04Y7BWMPS7BK7ACP4WP",
+      "parent_id": null,
+      "user_id": null
+    }
+  },
+  {
+    "entity_id": "sensor.sun_next_setting",
+    "state": "2026-09-28T22:43:27+00:00",
+    "attributes": {
+      "device_class": "timestamp",
+      "friendly_name": "Sun Próxima puesta de sol"
+    },
+    "last_changed": "2026-09-28T18:01:08.510810+00:00",
+    "last_reported": "2026-09-28T18:01:08.510810+00:00",
+    "last_updated": "2026-09-28T18:01:08.510810+00:00",
+    "context": {
+      "id": "01M3MJV04Y8Z8Z6RPGQH9VXB5V",
+      "parent_id": null,
+      "user_id": null
+    }
+  },
+  {
+    "entity_id": "binary_sensor.vivo_v30_bluetooth_state",
+    "state": "off",
+    "attributes": {
+      "icon": "mdi:bluetooth-off",
+      "friendly_name": "vivo v30 Bluetooth state"
+    },
+    "last_changed": "2026-09-28T18:01:08.773776+00:00",
+    "last_reported": "2026-09-28T18:01:08.773776+00:00",
+    "last_updated": "2026-09-28T18:01:08.773776+00:00",
+    "context": {
+      "id": "01M3MJV0D5WPWZ0FZ5Q0EYWS4G",
+      "parent_id": null,
+      "user_id": null
+    }
+  },
+  {
+    "entity_id": "device_tracker.vivo_v30",
+    "state": "unknown",
+    "attributes": {
+      "tracking_type": "position",
+      "in_zones": [],
+      "source_type": "gps",
+      "friendly_name": "vivo v30"
+    },
+    "last_changed": "2026-09-28T18:01:08.774265+00:00",
+    "last_reported": "2026-09-28T18:01:08.774265+00:00",
+    "last_updated": "2026-09-28T18:01:08.774265+00:00",
+    "context": {
+      "id": "01M3MJV0D6CD87QPQF57B07XE7",
+      "parent_id": null,
+      "user_id": null
+    }
+  },
+  {
+    "entity_id": "notify.vivo_v30",
+    "state": "unknown",
+    "attributes": {
+      "friendly_name": "vivo v30",
+      "supported_features": 1
+    },
+    "last_changed": "2026-09-28T18:01:08.774562+00:00",
+    "last_reported": "2026-09-28T18:01:08.774562+00:00",
+    "last_updated": "2026-09-28T18:01:08.774562+00:00",
+    "context": {
+      "id": "01M3MJV0D67XMWJWGNE846T552",
+      "parent_id": null,
+      "user_id": null
+    }
+  },
+  {
+    "entity_id": "sensor.vivo_v30_battery_level",
+    "state": "79",
+    "attributes": {
+      "state_class": "measurement",
+      "unit_of_measurement": "%",
+      "device_class": "battery",
+      "icon": "mdi:battery-70",
+      "friendly_name": "vivo v30 Battery level"
+    },
+    "last_changed": "2026-09-28T18:01:08.775010+00:00",
+    "last_reported": "2026-09-28T18:01:08.775010+00:00",
+    "last_updated": "2026-09-28T18:01:08.775010+00:00",
+    "context": {
+      "id": "01M3MJV0D7M9BQ3BVYK173M0VS",
+      "parent_id": null,
+      "user_id": null
+    }
+  },
+  {
+    "entity_id": "sensor.vivo_v30_battery_state",
+    "state": "discharging",
+    "attributes": {
+      "options": [
+        "charging",
+        "discharging",
+        "full",
+        "not_charging"
+      ],
+      "device_class": "enum",
+      "icon": "mdi:battery-minus",
+      "friendly_name": "vivo v30 Battery state"
+    },
+    "last_changed": "2026-09-28T18:01:08.775197+00:00",
+    "last_reported": "2026-09-28T18:01:08.775197+00:00",
+    "last_updated": "2026-09-28T18:01:08.775197+00:00",
+    "context": {
+      "id": "01M3MJV0D7YJD99Q6P23SWECGZ",
+      "parent_id": null,
+      "user_id": null
+    }
+  },
+  {
+    "entity_id": "sensor.vivo_v30_charger_type",
+    "state": "none",
+    "attributes": {
+      "options": [
+        "ac",
+        "usb",
+        "wireless",
+        "dock",
+        "none"
+      ],
+      "device_class": "enum",
+      "icon": "mdi:battery",
+      "friendly_name": "vivo v30 Charger type"
+    },
+    "last_changed": "2026-09-28T18:01:08.775365+00:00",
+    "last_reported": "2026-09-28T18:01:08.775365+00:00",
+    "last_updated": "2026-09-28T18:01:08.775365+00:00",
+    "context": {
+      "id": "01M3MJV0D7CWV6RMV9J6GBWBEQ",
+      "parent_id": null,
+      "user_id": null
+    }
+  },
+  {
+    "entity_id": "sensor.vivo_v30_sim_1",
+    "state": "SIM 1",
+    "attributes": {
+      "carrier id": 1429,
+      "carrier name": "Claro",
+      "data roaming": "disable",
+      "is opportunistic": false,
+      "iso country code": "cl",
+      "mcc": "730",
+      "mnc": "03",
+      "icon": "mdi:sim",
+      "friendly_name": "vivo v30 SIM 1"
+    },
+    "last_changed": "2026-09-28T18:01:08.775537+00:00",
+    "last_reported": "2026-09-28T18:01:08.775537+00:00",
+    "last_updated": "2026-09-28T18:01:08.775537+00:00",
+    "context": {
+      "id": "01M3MJV0D7AWCDBP615X81M4M5",
+      "parent_id": null,
+      "user_id": null
+    }
+  },
+  {
+    "entity_id": "tts.google_translate_en_com",
+    "state": "unknown",
+    "attributes": {
+      "friendly_name": "Google Translate en com"
+    },
+    "last_changed": "2026-09-28T18:01:08.784441+00:00",
+    "last_reported": "2026-09-28T18:01:08.784441+00:00",
+    "last_updated": "2026-09-28T18:01:08.784441+00:00",
+    "context": {
+      "id": "01M3MJV0DG9HN8QXP7KK1RP4YP",
+      "parent_id": null,
+      "user_id": null
+    }
+  },
+  {
+    "entity_id": "todo.lista_de_la_compra",
+    "state": "0",
+    "attributes": {
+      "friendly_name": "Lista de la compra",
+      "supported_features": 15
+    },
+    "last_changed": "2026-09-28T18:01:08.789037+00:00",
+    "last_reported": "2026-09-28T18:01:08.789037+00:00",
+    "last_updated": "2026-09-28T18:01:08.789037+00:00",
+    "context": {
+      "id": "01M3MJV0DNXSQGNK0F5ERHV68Z",
+      "parent_id": null,
+      "user_id": null
+    }
+  },
+  {
+    "entity_id": "binary_sensor.recmara_roku_streaming_stick_4k_auriculares_conectados",
+    "state": "off",
+    "attributes": {
+      "friendly_name": "Roku Streaming Stick 4K Auriculares conectados"
+    },
+    "last_changed": "2026-09-28T18:01:08.809526+00:00",
+    "last_reported": "2026-09-28T18:05:09.006980+00:00",
+    "last_updated": "2026-09-28T18:01:08.809526+00:00",
+    "context": {
+      "id": "01M3MJV0E9A9V0K9D96EHS8MHY",
+      "parent_id": null,
+      "user_id": null
+    }
+  },
+  {
+    "entity_id": "binary_sensor.recmara_roku_streaming_stick_4k_compatible_con_airplay",
+    "state": "on",
+    "attributes": {
+      "friendly_name": "Roku Streaming Stick 4K Compatible con AirPlay"
+    },
+    "last_changed": "2026-09-28T18:01:08.809736+00:00",
+    "last_reported": "2026-09-28T18:05:09.007006+00:00",
+    "last_updated": "2026-09-28T18:01:08.809736+00:00",
+    "context": {
+      "id": "01M3MJV0E98K3VWWFQ97Q2XXE1",
+      "parent_id": null,
+      "user_id": null
+    }
+  },
+  {
+    "entity_id": "binary_sensor.recmara_roku_streaming_stick_4k_compatible_con_ethernet",
+    "state": "off",
+    "attributes": {
+      "friendly_name": "Roku Streaming Stick 4K Compatible con Ethernet"
+    },
+    "last_changed": "2026-09-28T18:01:08.809910+00:00",
+    "last_reported": "2026-09-28T18:05:09.007015+00:00",
+    "last_updated": "2026-09-28T18:01:08.809910+00:00",
+    "context": {
+      "id": "01M3MJV0E9JHMS4FSN381K4YR7",
+      "parent_id": null,
+      "user_id": null
+    }
+  },
+  {
+    "entity_id": "binary_sensor.recmara_roku_streaming_stick_4k_compatible_con_encontrar_control_remoto",
+    "state": "on",
+    "attributes": {
+      "friendly_name": "Roku Streaming Stick 4K Compatible con encontrar control remoto"
+    },
+    "last_changed": "2026-09-28T18:01:08.810048+00:00",
+    "last_reported": "2026-09-28T18:05:09.007020+00:00",
+    "last_updated": "2026-09-28T18:01:08.810048+00:00",
+    "context": {
+      "id": "01M3MJV0EAQ7MVA39EZ8ZY7SK9",
+      "parent_id": null,
+      "user_id": null
+    }
+  },
+  {
+    "entity_id": "media_player.recmara_roku_streaming_stick_4k",
+    "state": "idle",
+    "attributes": {
+      "source_list": [
+        "Home",
+        "Apple TV",
+        "Crunchyroll",
+        "Disney Plus",
+        "FreeTV: Películas, Series y TV",
+        "Home Fireplace -  Fire Videos on Screen",
+        "Kick - Livestreaming",
+        "Netflix",
+        "Plex - TV y películas gratis",
+        "Prime Video",
+        "Screen Mirroring",
+        "Spotify Music",
+        "ViX: TV, Futbol y Noticias",
+        "Viki",
+        "Web Video Caster - Receiver",
+        "YouTube"
+      ],
+      "media_content_type": "app",
+      "app_id": "562859",
+      "app_name": "Roku Dynamic Menu",
+      "source": "Roku Dynamic Menu",
+      "device_class": "receiver",
+      "entity_picture": "/api/media_player_proxy/media_player.recmara_roku_streaming_stick_4k?token=78506c7f1d4e107986f570b6a413c792f92ff3cc40123bedb46d7732b08de113&cache=5f405fa76c3881ea",
+      "friendly_name": "Roku Streaming Stick 4K",
+      "supported_features": 151481
+    },
+    "last_changed": "2026-09-28T18:01:08.810576+00:00",
+    "last_reported": "2026-09-28T18:05:09.007131+00:00",
+    "last_updated": "2026-09-28T18:01:08.810576+00:00",
+    "context": {
+      "id": "01M3MJV0EACKDETNRD1B16WRQP",
+      "parent_id": null,
+      "user_id": null
+    }
+  },
+  {
+    "entity_id": "remote.recmara_roku_streaming_stick_4k",
+    "state": "on",
+    "attributes": {
+      "friendly_name": "Roku Streaming Stick 4K",
+      "supported_features": 0
+    },
+    "last_changed": "2026-09-28T18:01:08.810998+00:00",
+    "last_reported": "2026-09-28T18:05:09.007157+00:00",
+    "last_updated": "2026-09-28T18:01:08.810998+00:00",
+    "context": {
+      "id": "01M3MJV0EAZBQPF5AP0XWRHZAX",
+      "parent_id": null,
+      "user_id": null
+    }
+  },
+  {
+    "entity_id": "sensor.recmara_roku_streaming_stick_4k_aplicacion_activa",
+    "state": "Roku Dynamic Menu",
+    "attributes": {
+      "friendly_name": "Roku Streaming Stick 4K Aplicación activa"
+    },
+    "last_changed": "2026-09-28T18:01:08.811583+00:00",
+    "last_reported": "2026-09-28T18:05:09.007184+00:00",
+    "last_updated": "2026-09-28T18:01:08.811583+00:00",
+    "context": {
+      "id": "01M3MJV0EBN6CDYD2MB35DGW9B",
+      "parent_id": null,
+      "user_id": null
+    }
+  },
+  {
+    "entity_id": "sensor.recmara_roku_streaming_stick_4k_id_de_aplicacion_activa",
+    "state": "562859",
+    "attributes": {
+      "friendly_name": "Roku Streaming Stick 4K ID de aplicación activa"
+    },
+    "last_changed": "2026-09-28T18:01:08.811768+00:00",
+    "last_reported": "2026-09-28T18:05:09.007195+00:00",
+    "last_updated": "2026-09-28T18:01:08.811768+00:00",
+    "context": {
+      "id": "01M3MJV0EBT9R01GDNMVETNJ89",
+      "parent_id": null,
+      "user_id": null
+    }
+  },
+  {
+    "entity_id": "weather.forecast_casa",
+    "state": "rainy",
+    "attributes": {
+      "temperature": 19.1,
+      "dew_point": 13.9,
+      "temperature_unit": "°C",
+      "humidity": 71,
+      "cloud_coverage": 61.7,
+      "uv_index": 6.2,
+      "pressure": 1018.9,
+      "pressure_unit": "hPa",
+      "wind_bearing": 97.1,
+      "wind_speed": 7.9,
+      "wind_speed_unit": "km/h",
+      "visibility_unit": "km",
+      "precipitation_unit": "mm",
+      "attribution": "Weather forecast from met.no, delivered by the Norwegian Meteorological Institute.",
+      "friendly_name": "Forecast Casa",
+      "supported_features": 3
+    },
+    "last_changed": "2026-09-28T18:01:09.392712+00:00",
+    "last_reported": "2026-09-28T18:01:09.392712+00:00",
+    "last_updated": "2026-09-28T18:01:09.392712+00:00",
+    "context": {
+      "id": "01M3MJV10GVABZ32R9NWC5CYJN",
+      "parent_id": null,
+      "user_id": null
+    }
+  }
+]
