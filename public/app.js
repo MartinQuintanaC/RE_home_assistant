@@ -285,22 +285,43 @@ function renderVehicles() {
               </div>
               <span class="text-slate-400">${escapeHtml(vehi.lastReport)}</span>
             </div>
+
+            <!-- Cámaras de Video (si tiene soporte MDVR) -->
+            ${vehi.hasVideo || vehi.channelCount > 0 ? `
+              <div class="flex items-center justify-between p-2.5 rounded-xl bg-indigo-950/40 border border-indigo-900/50 text-xs">
+                <div class="flex items-center gap-2 text-indigo-400">
+                  <i data-lucide="video" class="w-4 h-4"></i>
+                  <span class="font-medium text-indigo-200">Cámaras MDVR</span>
+                </div>
+                <span class="font-bold text-indigo-400">${vehi.channelCount} Canales (${(vehi.channelNames || []).join(', ')})</span>
+              </div>
+            ` : ''}
           </div>
         </div>
 
-        <!-- ACCIÓN: VER EN GOOGLE MAPS -->
-        ${vehi.googleMapsUrl ? `
-          <div class="mt-4 pt-3 border-t border-slate-800/80">
+        <!-- ACCIONES: VIDEO Y GOOGLE MAPS -->
+        <div class="mt-4 pt-3 border-t border-slate-800/80 space-y-2">
+          ${vehi.hasVideo || vehi.channelCount > 0 ? `
+            <button 
+              onclick="openVideoModal('${vehi.deviceId}', '${escapeHtml(vehi.name)}', ${isOnline}, ${vehi.channelCount})" 
+              class="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 hover:to-sky-500 text-white text-xs font-semibold shadow-lg shadow-indigo-600/20 active:scale-95 transition-all cursor-pointer"
+            >
+              <i data-lucide="video" class="w-4 h-4"></i>
+              <span>${isOnline ? '🎥 Ver Cámara en Vivo' : '🎥 Ver Cámara (Offline)'}</span>
+            </button>
+          ` : ''}
+
+          ${vehi.googleMapsUrl ? `
             <a 
               href="${escapeHtml(vehi.googleMapsUrl)}" 
               target="_blank" 
-              class="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/30 text-emerald-400 hover:text-emerald-300 text-xs font-semibold transition-all cursor-pointer"
+              class="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-slate-900/60 hover:bg-slate-800/80 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white text-xs font-semibold transition-all cursor-pointer"
             >
-              <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+              <i data-lucide="map-pin" class="w-3.5 h-3.5 text-emerald-400"></i>
               <span>Abrir Ubicación en Google Maps</span>
             </a>
-          </div>
-        ` : ''}
+          ` : ''}
+        </div>
       </div>
     `;
   }).join('');
@@ -483,8 +504,216 @@ function showToast(message) {
   }, 2500);
 }
 
+// 7. GESTIÓN DEL VISOR DE VIDEO EN VIVO (HLS / OPENTRAXX)
+let currentHlsInstance = null;
+let currentVideoDevice = null;
+let currentVideoChannel = 1;
+let currentVehicleName = '';
+let currentIsOnline = false;
+let currentChannelCount = 1;
+
+async function openVideoModal(deviceId, vehicleName, isOnline, channelCount = 1) {
+  currentVideoDevice = deviceId;
+  currentVehicleName = vehicleName;
+  currentIsOnline = isOnline;
+  currentChannelCount = channelCount || 1;
+  currentVideoChannel = 1;
+
+  const modal = document.getElementById('video-modal');
+  const titleEl = document.getElementById('video-modal-title');
+  const subtitleEl = document.getElementById('video-modal-subtitle');
+  const badgeEl = document.getElementById('video-modal-status-badge');
+  const offlineAlert = document.getElementById('video-offline-alert');
+
+  if (titleEl) titleEl.textContent = `Cámara en Vivo • ${vehicleName}`;
+  if (subtitleEl) subtitleEl.textContent = `Dispositivo GPS: ${deviceId} • ${currentChannelCount} canal(es) de video`;
+
+  if (badgeEl) {
+    if (isOnline) {
+      badgeEl.className = 'px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+      badgeEl.textContent = 'En línea';
+      if (offlineAlert) offlineAlert.classList.add('hidden');
+    } else {
+      badgeEl.className = 'px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/30';
+      badgeEl.textContent = 'Desconectado';
+      if (offlineAlert) offlineAlert.classList.remove('hidden');
+    }
+  }
+
+  // Generar botones de canales
+  renderChannelPills();
+
+  // Abrir ventana modal
+  if (modal) modal.classList.remove('hidden');
+  refreshIcons();
+
+  // Iniciar carga del canal 1
+  loadStreamChannel(currentVideoChannel);
+}
+
+function renderChannelPills() {
+  const pillsContainer = document.getElementById('video-channel-pills');
+  if (!pillsContainer) return;
+
+  pillsContainer.innerHTML = '';
+  const count = Math.max(1, currentChannelCount);
+
+  for (let ch = 1; ch <= count; ch++) {
+    const isActive = ch === currentVideoChannel;
+    const btn = document.createElement('button');
+    btn.className = isActive
+      ? 'px-3 py-1 rounded-lg text-xs font-semibold bg-indigo-600 text-white shadow-sm transition-all cursor-pointer'
+      : 'px-3 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white transition-all cursor-pointer';
+    btn.textContent = `CH ${ch}`;
+    btn.onclick = () => switchVideoChannel(ch);
+    pillsContainer.appendChild(btn);
+  }
+}
+
+function switchVideoChannel(ch) {
+  if (ch === currentVideoChannel) return;
+  currentVideoChannel = ch;
+  renderChannelPills();
+  loadStreamChannel(ch);
+}
+
+function retryCurrentChannel() {
+  loadStreamChannel(currentVideoChannel);
+}
+
+async function loadStreamChannel(channel) {
+  const videoEl = document.getElementById('camera-video-player');
+  const spinner = document.getElementById('video-spinner');
+  const spinnerText = document.getElementById('video-spinner-text');
+  const offlineAlert = document.getElementById('video-offline-alert');
+  const directLink = document.getElementById('video-player-direct-url');
+  const techInfo = document.getElementById('video-stream-tech-info');
+
+  if (spinner) spinner.classList.remove('opacity-0', 'pointer-events-none');
+  if (spinnerText) spinnerText.textContent = `Conectando a canal CH${channel}...`;
+
+  // Detener y limpiar reproducción previa
+  if (currentHlsInstance) {
+    currentHlsInstance.destroy();
+    currentHlsInstance = null;
+  }
+  if (videoEl) {
+    videoEl.pause();
+    videoEl.removeAttribute('src');
+    videoEl.load();
+  }
+
+  try {
+    const res = await fetch(`/api/opentraxx/video/${currentVideoDevice}?channel=${channel}`);
+    const data = await res.json();
+
+    if (!data.success) {
+      if (spinnerText) spinnerText.textContent = `Error: ${data.error || 'No se pudo obtener el stream'}`;
+      return;
+    }
+
+    if (directLink && data.playerUrl) {
+      directLink.href = data.playerUrl;
+    }
+
+    // Si el dispositivo está fuera de línea
+    if (!data.isOnline) {
+      if (offlineAlert) offlineAlert.classList.remove('hidden');
+      if (spinner) spinner.classList.add('opacity-0', 'pointer-events-none');
+      return;
+    } else {
+      if (offlineAlert) offlineAlert.classList.add('hidden');
+    }
+
+    const streamUrl = data.streamUrl;
+    if (techInfo) {
+      techInfo.textContent = `CH${channel} • HLS Puerto 16604 • MDVR ${escapeHtml(currentVehicleName)}`;
+    }
+
+    // Inicializar reproductor Hls.js
+    if (window.Hls && window.Hls.isSupported()) {
+      const hls = new Hls({
+        liveSyncDurationCount: 3,
+        liveMaxLatencyDurationCount: 6,
+        enableWorker: true,
+      });
+
+      currentHlsInstance = hls;
+      hls.loadSource(streamUrl);
+      hls.attachMedia(videoEl);
+
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        if (spinner) spinner.classList.add('opacity-0', 'pointer-events-none');
+        videoEl.play().catch(e => console.log('Autoplay silencioso requerido por el navegador:', e));
+      });
+
+      hls.on(Hls.Events.ERROR, (event, errorData) => {
+        console.warn('⚠️ [HLS Stream Event]:', errorData);
+        if (errorData.fatal) {
+          switch (errorData.type) {
+            case Hls.ErrorTypes.NETWORK_ERROR:
+              if (spinnerText) spinnerText.textContent = 'Esperando paquetes de video de la cámara...';
+              hls.startLoad();
+              break;
+            case Hls.ErrorTypes.MEDIA_ERROR:
+              hls.recoverMediaError();
+              break;
+            default:
+              hls.destroy();
+              if (spinnerText) spinnerText.textContent = 'Señal pausada por el dispositivo vehicular.';
+              break;
+          }
+        }
+      });
+    } else if (videoEl && videoEl.canPlayType('application/vnd.apple.mpegurl')) {
+      // Soporte nativo HLS para Safari en iOS / macOS
+      videoEl.src = streamUrl;
+      videoEl.addEventListener('loadedmetadata', () => {
+        if (spinner) spinner.classList.add('opacity-0', 'pointer-events-none');
+        videoEl.play().catch(e => console.log('Autoplay Safari:', e));
+      });
+    } else {
+      if (spinnerText) spinnerText.textContent = 'Este navegador no soporta streaming HLS.';
+    }
+
+  } catch (err) {
+    console.error('❌ Error al solicitar video stream:', err);
+    if (spinnerText) spinnerText.textContent = 'Error al conectar con la API de video.';
+  }
+}
+
+function closeVideoModal() {
+  const modal = document.getElementById('video-modal');
+  const videoEl = document.getElementById('camera-video-player');
+
+  if (currentHlsInstance) {
+    currentHlsInstance.destroy();
+    currentHlsInstance = null;
+  }
+
+  if (videoEl) {
+    videoEl.pause();
+    videoEl.removeAttribute('src');
+    videoEl.load();
+  }
+
+  if (modal) modal.classList.add('hidden');
+}
+
+// Cerrar con Escape o haciendo clic fuera del modal
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeVideoModal();
+});
+
 document.addEventListener('DOMContentLoaded', () => {
   refreshIcons();
   switchTab('ha');
   setupSSE();
+
+  const modal = document.getElementById('video-modal');
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeVideoModal();
+    });
+  }
 });

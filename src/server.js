@@ -99,6 +99,14 @@ app.post('/api/opentraxx/sync', async (req, res) => {
   });
 });
 
+// 3b. Obtener información y streaming de video de una cámara MDVR
+app.get('/api/opentraxx/video/:deviceId', async (req, res) => {
+  const { deviceId } = req.params;
+  const channel = parseInt(req.query.channel, 10) || 1;
+  const videoInfo = await opentraxxClient.getVideoStreamInfo(deviceId, channel);
+  res.json(videoInfo);
+});
+
 // 4. Stream en tiempo real vía Server-Sent Events (SSE)
 =======
 // 2. Stream en tiempo real vía Server-Sent Events (SSE)

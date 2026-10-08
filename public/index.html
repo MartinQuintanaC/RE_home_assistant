@@ -9,6 +9,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- HLS.js Video Streaming Library CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <style>
     .glass-card {
       background: rgba(30, 41, 59, 0.7);
@@ -117,6 +119,116 @@
         <!-- Los vehículos de OpenTraxx se renderizan aquí -->
       </div>
     </section>
+
+    <!-- MODAL DE TRANSMISIÓN DE VIDEO EN VIVO (OPENTRAXX) -->
+    <div id="video-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 transition-all duration-300 hidden">
+      <div class="max-w-4xl w-full glass-card rounded-2xl border border-slate-700/80 shadow-2xl flex flex-col overflow-hidden max-h-[95vh]">
+        
+        <!-- ENCABEZADO DEL MODAL -->
+        <div class="flex items-center justify-between p-4 border-b border-slate-800/80 bg-slate-900/60">
+          <div class="flex items-center gap-3">
+            <div class="p-2 rounded-xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
+              <i data-lucide="video" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h3 id="video-modal-title" class="font-bold text-slate-100 text-base">Cámara en Vivo</h3>
+                <span id="video-modal-status-badge" class="px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                  En línea
+                </span>
+              </div>
+              <p id="video-modal-subtitle" class="text-xs text-slate-400">ID: -- • MDVR OpenTraxx</p>
+            </div>
+          </div>
+
+          <button 
+            onclick="closeVideoModal()" 
+            class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition-all cursor-pointer"
+            title="Cerrar reproductor"
+          >
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <!-- SELECTOR DE CANALES (CH1, CH2, ...) -->
+        <div class="px-4 py-2.5 bg-slate-900/40 border-b border-slate-800/60 flex items-center gap-2 overflow-x-auto">
+          <span class="text-xs font-semibold text-slate-400 shrink-0 mr-1 flex items-center gap-1.5">
+            <i data-lucide="camera" class="w-3.5 h-3.5 text-indigo-400"></i>
+            Canal:
+          </span>
+          <div id="video-channel-pills" class="flex items-center gap-1.5">
+            <!-- Botones de canales generados dinámicamente -->
+          </div>
+        </div>
+
+        <!-- CONTENEDOR DE REPRODUCTOR DE VIDEO -->
+        <div class="relative w-full aspect-video bg-black flex items-center justify-center overflow-hidden">
+          
+          <!-- Elemento de video HTML5 estándar -->
+          <video 
+            id="camera-video-player" 
+            class="w-full h-full object-contain" 
+            controls 
+            autoplay 
+            playsinline
+          ></video>
+
+          <!-- Spinner de carga del stream -->
+          <div id="video-spinner" class="absolute inset-0 bg-slate-950/75 backdrop-blur-sm flex flex-col items-center justify-center gap-3 transition-opacity">
+            <div class="w-10 h-10 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin"></div>
+            <p id="video-spinner-text" class="text-xs font-medium text-slate-300">Conectando al stream en vivo (HLS)...</p>
+          </div>
+
+          <!-- Mensaje cuando el equipo está desconectado -->
+          <div id="video-offline-alert" class="absolute inset-0 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center gap-3 hidden">
+            <div class="p-3 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20">
+              <i data-lucide="wifi-off" class="w-8 h-8"></i>
+            </div>
+            <div class="max-w-md">
+              <h4 class="font-bold text-slate-200 text-sm mb-1">Cámara Vehicular Fuera de Línea</h4>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                El vehículo actualmente se encuentra apagado o sin conexión celular móvil. El streaming HLS estará disponible inmediatamente cuando el motor o contacto sea encendido.
+              </p>
+            </div>
+            <button 
+              id="btn-retry-video" 
+              onclick="retryCurrentChannel()" 
+              class="mt-2 flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-300 border border-slate-700 cursor-pointer"
+            >
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+              <span>Reintentar Conexión</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- PIE DEL MODAL -->
+        <div class="p-3 sm:px-5 sm:py-3 border-t border-slate-800/80 bg-slate-900/60 flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div class="flex items-center gap-2 text-slate-400">
+            <span class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>
+            <span id="video-stream-tech-info">HLS v3 • Puerto Seguro 16604 • Sub-stream H.264</span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <a 
+              id="video-player-direct-url" 
+              href="#" 
+              target="_blank" 
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/80 transition-all"
+            >
+              <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+              <span>Abrir Visor Externo</span>
+            </a>
+            <button 
+              onclick="closeVideoModal()" 
+              class="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium shadow-md shadow-indigo-600/20 cursor-pointer"
+            >
+              Listo
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
 
     <!-- NOTIFICACIÓN TOAST -->
     <div id="toast"

@@ -98,6 +98,11 @@ class OpenTraxxClient {
         const speedKmh = statusObj?.sp !== undefined ? Math.round(statusObj.sp / 10) : 0;
         const lastGpsTime = statusObj?.gt || 'Sin reporte reciente';
 
+        const devInfo = v.dl && v.dl.length > 0 ? v.dl[0] : null;
+        const channelCount = devInfo?.cc || 0;
+        const channelNames = devInfo?.cn ? devInfo.cn.split(',') : [];
+        const hasVideo = channelCount > 0;
+
         detailedVehicles.push({
           id: v.id,
           name: v.nm || `Vehículo #${v.id}`,
@@ -110,7 +115,10 @@ class OpenTraxxClient {
           locationFormatted: (lat && lng) ? `${lat.toFixed(5)}, ${lng.toFixed(5)}` : 'No disponible',
           googleMapsUrl: (lat && lng) ? `https://www.google.com/maps?q=${lat},${lng}` : null,
           lastReport: lastGpsTime,
-          deviceType: 'GPS Vehicular / Flota',
+          deviceType: hasVideo ? `MDVR / Cámara (${channelCount} CH)` : 'GPS Vehicular / Flota',
+          channelCount,
+          channelNames,
+          hasVideo,
         });
       }
 
@@ -122,6 +130,50 @@ class OpenTraxxClient {
       return this.vehiclesCache;
     } finally {
       this.isSyncing = false;
+    }
+  }
+
+  // 3. Obtener URL de streaming HLS y datos de canal de video del dispositivo
+  async getVideoStreamInfo(deviceId, channel = 1) {
+    let session = await this.ensureSession();
+    if (!session) {
+      return { success: false, error: 'Sesión no disponible' };
+    }
+
+    try {
+      let vUrl = `${config.opentraxxUrl}/StandardApiAction_getVideoDevice.action?jsession=${session}&devIdno=${deviceId}`;
+      let vRes = await fetch(vUrl, { headers: { 'Accept': 'application/json' } });
+      let vData = await vRes.json();
+
+      if (vData.result === 5) {
+        session = await this.login();
+        vUrl = `${config.opentraxxUrl}/StandardApiAction_getVideoDevice.action?jsession=${session}&devIdno=${deviceId}`;
+        vRes = await fetch(vUrl, { headers: { 'Accept': 'application/json' } });
+        vData = await vRes.json();
+      }
+
+      const isOnline = vData.isOnline === 1;
+      const chnCount = vData.chnCount || 1;
+      const chnNames = vData.chnName ? vData.chnName.split(',') : [];
+
+      // Puerto HLS HTTPS oficial es 16604
+      const streamUrl = `https://opentraxx.cl:16604/hls/1_${deviceId}_${channel}_1.m3u8?JSESSIONID=${session}`;
+      const playerUrl = `${config.opentraxxUrl}/808gps/open/hls/index.html?devIdno=${deviceId}&jsession=${session}&channel=${channel}&stream=1`;
+
+      return {
+        success: true,
+        deviceId,
+        channel: parseInt(channel, 10),
+        isOnline,
+        chnCount,
+        chnNames,
+        streamUrl,
+        playerUrl,
+        jsession: session,
+      };
+    } catch (err) {
+      console.error(`❌ [OpenTraxx] Error al obtener stream de video para ${deviceId}:`, err.message);
+      return { success: false, error: err.message };
     }
   }
 
