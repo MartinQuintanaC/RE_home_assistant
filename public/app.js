@@ -636,11 +636,12 @@ async function loadStreamChannel(channel) {
       const hls = new Hls({
         enableWorker: true,
         lowLatencyMode: true,
-        liveSyncDurationCount: 2, // 2 fragmentos de búfer para evitar que el 4G se quede sin paquetes
-        liveMaxLatencyDurationCount: 3, // Tolerancia máxima
+        liveSyncDuration: 4, // 4 segundos exactos de retraso (en vez de multiplicar por los 20s de OpenTraxx)
+        liveMaxLatencyDuration: 8, // Máximo 8 segundos de tolerancia antes de acelerar
+        maxLiveSyncPlaybackRate: 1.2, // Acelera suavemente un 20% si hay desfase sin pausar el video
         liveDurationInfinity: true,
-        maxLiveSyncPlaybackRate: 1.15, // Acelera 15% de forma invisible sin cortar ni congelar el video
         backBufferLength: 0,
+        maxBufferLength: 6,
       });
 
       currentHlsInstance = hls;
@@ -651,6 +652,9 @@ async function loadStreamChannel(channel) {
         if (spinner) spinner.classList.add('opacity-0', 'pointer-events-none');
         videoEl.muted = true; // Silenciado al inicio para evitar restricciones de autoplay
         updateMuteButtonUI();
+        if (hls.liveSyncPosition) {
+          videoEl.currentTime = hls.liveSyncPosition;
+        }
         videoEl.play().catch(e => console.log('Autoplay silencioso requerido por el navegador:', e));
       });
 
