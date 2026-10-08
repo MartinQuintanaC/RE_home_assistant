@@ -631,19 +631,16 @@ async function loadStreamChannel(channel) {
       techInfo.textContent = `CH${channel} • HLS Puerto 16604 • Baja Latencia • MDVR ${escapeHtml(currentVehicleName)}`;
     }
 
-    // Inicializar reproductor Hls.js con configuración Ultra Baja Latencia
+    // Inicializar reproductor Hls.js calibrado para estabilidad y fluidez continua
     if (window.Hls && window.Hls.isSupported()) {
       const hls = new Hls({
         enableWorker: true,
         lowLatencyMode: true,
-        liveSyncDurationCount: 1, // Búfer inicial mínimo: solo 1 fragmento
-        liveMaxLatencyDurationCount: 2, // No permitir acumular más de 2 fragmentos de delay
+        liveSyncDurationCount: 2, // 2 fragmentos de búfer para evitar que el 4G se quede sin paquetes
+        liveMaxLatencyDurationCount: 3, // Tolerancia máxima
         liveDurationInfinity: true,
-        maxLiveSyncPlaybackRate: 1.25, // Acelera sutilmente si hay atraso para alcanzar el en vivo
-        backBufferLength: 0, // No almacenar búfer hacia atrás
-        maxBufferLength: 4,
-        maxMaxBufferLength: 6,
-        highBufferWatchdogPeriod: 1,
+        maxLiveSyncPlaybackRate: 1.15, // Acelera 15% de forma invisible sin cortar ni congelar el video
+        backBufferLength: 0,
       });
 
       currentHlsInstance = hls;
@@ -655,13 +652,6 @@ async function loadStreamChannel(channel) {
         videoEl.muted = true; // Silenciado al inicio para evitar restricciones de autoplay
         updateMuteButtonUI();
         videoEl.play().catch(e => console.log('Autoplay silencioso requerido por el navegador:', e));
-      });
-
-      // Forzar avance al borde más reciente cada vez que llega un fragmento nuevo
-      hls.on(Hls.Events.LEVEL_UPDATED, () => {
-        if (hls.liveSyncPosition && videoEl.currentTime < hls.liveSyncPosition - 2) {
-          videoEl.currentTime = hls.liveSyncPosition;
-        }
       });
 
       hls.on(Hls.Events.ERROR, (event, errorData) => {
