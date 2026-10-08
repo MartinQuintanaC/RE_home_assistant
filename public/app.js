@@ -545,6 +545,7 @@ async function openVideoModal(deviceId, vehicleName, isOnline, channelCount = 1)
 
   // Abrir ventana modal
   if (modal) modal.classList.remove('hidden');
+  startLiveClock();
   refreshIcons();
 
   // Iniciar carga del canal 1
@@ -627,15 +628,22 @@ async function loadStreamChannel(channel) {
 
     const streamUrl = data.streamUrl;
     if (techInfo) {
-      techInfo.textContent = `CH${channel} • HLS Puerto 16604 • MDVR ${escapeHtml(currentVehicleName)}`;
+      techInfo.textContent = `CH${channel} • HLS Puerto 16604 • Baja Latencia • MDVR ${escapeHtml(currentVehicleName)}`;
     }
 
-    // Inicializar reproductor Hls.js
+    // Inicializar reproductor Hls.js con configuración Ultra Baja Latencia
     if (window.Hls && window.Hls.isSupported()) {
       const hls = new Hls({
-        liveSyncDurationCount: 3,
-        liveMaxLatencyDurationCount: 6,
         enableWorker: true,
+        lowLatencyMode: true,
+        liveSyncDurationCount: 1, // Búfer inicial mínimo: solo 1 fragmento
+        liveMaxLatencyDurationCount: 2, // No permitir acumular más de 2 fragmentos de delay
+        liveDurationInfinity: true,
+        maxLiveSyncPlaybackRate: 1.25, // Acelera sutilmente si hay atraso para alcanzar el en vivo
+        backBufferLength: 0, // No almacenar búfer hacia atrás
+        maxBufferLength: 4,
+        maxMaxBufferLength: 6,
+        highBufferWatchdogPeriod: 1,
       });
 
       currentHlsInstance = hls;
@@ -644,7 +652,16 @@ async function loadStreamChannel(channel) {
 
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
         if (spinner) spinner.classList.add('opacity-0', 'pointer-events-none');
+        videoEl.muted = true; // Silenciado al inicio para evitar restricciones de autoplay
+        updateMuteButtonUI();
         videoEl.play().catch(e => console.log('Autoplay silencioso requerido por el navegador:', e));
+      });
+
+      // Forzar avance al borde más reciente cada vez que llega un fragmento nuevo
+      hls.on(Hls.Events.LEVEL_UPDATED, () => {
+        if (hls.liveSyncPosition && videoEl.currentTime < hls.liveSyncPosition - 2) {
+          videoEl.currentTime = hls.liveSyncPosition;
+        }
       });
 
       hls.on(Hls.Events.ERROR, (event, errorData) => {
@@ -670,6 +687,8 @@ async function loadStreamChannel(channel) {
       videoEl.src = streamUrl;
       videoEl.addEventListener('loadedmetadata', () => {
         if (spinner) spinner.classList.add('opacity-0', 'pointer-events-none');
+        videoEl.muted = true;
+        updateMuteButtonUI();
         videoEl.play().catch(e => console.log('Autoplay Safari:', e));
       });
     } else {
@@ -682,9 +701,62 @@ async function loadStreamChannel(channel) {
   }
 }
 
+// Control de Mute / Audio
+function toggleVideoMute() {
+  const videoEl = document.getElementById('camera-video-player');
+  if (!videoEl) return;
+  videoEl.muted = !videoEl.muted;
+  updateMuteButtonUI();
+}
+
+function updateMuteButtonUI() {
+  const videoEl = document.getElementById('camera-video-player');
+  const muteIcon = document.getElementById('mute-icon');
+  if (!videoEl || !muteIcon) return;
+  muteIcon.setAttribute('data-lucide', videoEl.muted ? 'volume-x' : 'volume-2');
+  refreshIcons();
+}
+
+// Control de Pantalla Completa
+function toggleVideoFullscreen() {
+  const wrapper = document.getElementById('video-wrapper') || document.getElementById('camera-video-player');
+  if (!document.fullscreenElement) {
+    if (wrapper.requestFullscreen) {
+      wrapper.requestFullscreen();
+    } else if (wrapper.webkitRequestFullscreen) {
+      wrapper.webkitRequestFullscreen();
+    }
+  } else {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    }
+  }
+}
+
+// Reloj en tiempo real para la barra de estado CCTV
+let liveClockInterval = null;
+function startLiveClock() {
+  stopLiveClock();
+  const timeEl = document.getElementById('live-time-display');
+  const update = () => {
+    if (timeEl) timeEl.textContent = new Date().toLocaleTimeString();
+  };
+  update();
+  liveClockInterval = setInterval(update, 1000);
+}
+
+function stopLiveClock() {
+  if (liveClockInterval) {
+    clearInterval(liveClockInterval);
+    liveClockInterval = null;
+  }
+}
+
 function closeVideoModal() {
   const modal = document.getElementById('video-modal');
   const videoEl = document.getElementById('camera-video-player');
+
+  stopLiveClock();
 
   if (currentHlsInstance) {
     currentHlsInstance.destroy();
