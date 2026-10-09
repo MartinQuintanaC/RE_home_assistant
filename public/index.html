@@ -161,15 +161,20 @@
             </div>
           </div>
 
-          <!-- Indicador WebSocket y Tip de uso -->
+          <!-- Botón de Sincronización en Vivo y Tip de uso -->
           <div class="flex items-center gap-3 shrink-0">
             <span class="hidden md:inline text-[11px] text-slate-400 font-medium">
-              💡 Doble clic en cualquier cuadro para agrandar
+              💡 Doble clic para agrandar
             </span>
-            <div class="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
+            <button 
+              id="btn-sync-live" 
+              onclick="syncLiveStream()" 
+              class="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 hover:text-emerald-300 text-xs font-semibold cursor-pointer transition-all active:scale-95 shadow-sm"
+              title="Volver al momento exacto en vivo sin retraso"
+            >
               <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span>WebSocket en Vivo</span>
-            </div>
+              <span>🔴 En Vivo • Sincronizar</span>
+            </button>
           </div>
         </div>
 

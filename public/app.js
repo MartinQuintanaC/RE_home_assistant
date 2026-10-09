@@ -570,10 +570,14 @@ function renderChannelPills() {
 }
 
 function switchVideoChannel(ch) {
-  if (ch === currentVideoChannel) return;
   currentVideoChannel = ch;
   renderChannelPills();
   loadStreamChannel(ch);
+}
+
+function syncLiveStream() {
+  showToast('⚡ Sincronizando al instante en vivo...');
+  loadStreamChannel(currentVideoChannel);
 }
 
 function retryCurrentChannel() {
