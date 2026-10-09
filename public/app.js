@@ -619,8 +619,7 @@ async function loadStreamChannel(channel) {
         if (spinner) spinner.classList.add('opacity-0', 'pointer-events-none');
       }, 2500);
 
-      const playerUrl = (data.wsPlayerUrl || '').replace('lang=es', 'lang=en');
-      iframeEl.src = playerUrl;
+      iframeEl.src = data.wsPlayerUrl;
     }
 
     if (techInfo) {
