@@ -174,14 +174,12 @@
         </div>
 
         <!-- CONTENEDOR DE REPRODUCTOR DE VIDEO -->
-        <div id="video-wrapper" class="relative w-full aspect-video bg-black flex items-center justify-center overflow-hidden select-none">
+        <div id="video-wrapper" class="relative w-full aspect-video bg-black overflow-hidden select-none">
           
-          <!-- Visor: Reproductor WebSocket Nativo (videoH5 / Canvas Wasm) -->
-          <!-- Offset de -11px y +22px para ocultar completamente el margen y fondo blanco (#ffffff) nativo de videoH5.html -->
+          <!-- Visor: Reproductor WebSocket Nativo (videoH5 / Canvas Wasm con tema oscuro) -->
           <iframe 
             id="camera-iframe-player" 
-            class="absolute border-0 bg-black" 
-            style="top: -11px; left: -11px; width: calc(100% + 22px); height: calc(100% + 22px);"
+            class="w-full h-full border-0 bg-black block" 
             allow="autoplay; fullscreen"
           ></iframe>
 
