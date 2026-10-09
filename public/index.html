@@ -139,23 +139,13 @@
             </div>
           </div>
 
-          <div class="flex items-center gap-2">
-            <button 
-              id="btn-video-fullscreen" 
-              onclick="toggleVideoFullscreen()" 
-              class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition-all cursor-pointer"
-              title="Pantalla Completa"
-            >
-              <i data-lucide="maximize" class="w-5 h-5"></i>
-            </button>
-            <button 
-              onclick="closeVideoModal()" 
-              class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition-all cursor-pointer"
-              title="Cerrar reproductor"
-            >
-              <i data-lucide="x" class="w-5 h-5"></i>
-            </button>
-          </div>
+          <button 
+            onclick="closeVideoModal()" 
+            class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition-all cursor-pointer"
+            title="Cerrar reproductor"
+          >
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
         </div>
 
         <!-- SELECTOR DE CANALES Y DETALLES EN VIVO (WEBSOCKET NATIVO) -->
@@ -184,12 +174,14 @@
         </div>
 
         <!-- CONTENEDOR DE REPRODUCTOR DE VIDEO -->
-        <div id="video-wrapper" class="relative w-full aspect-video bg-black flex items-center justify-center overflow-hidden group select-none">
+        <div id="video-wrapper" class="relative w-full aspect-video bg-black flex items-center justify-center overflow-hidden select-none">
           
           <!-- Visor: Reproductor WebSocket Nativo (videoH5 / Canvas Wasm) -->
+          <!-- Offset de -11px y +22px para ocultar completamente el margen y fondo blanco (#ffffff) nativo de videoH5.html -->
           <iframe 
             id="camera-iframe-player" 
-            class="w-full h-full border-0 rounded-xl bg-black" 
+            class="absolute border-0 bg-black" 
+            style="top: -11px; left: -11px; width: calc(100% + 22px); height: calc(100% + 22px);"
             allow="autoplay; fullscreen"
           ></iframe>
 

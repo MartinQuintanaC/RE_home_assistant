@@ -632,22 +632,6 @@ async function loadStreamChannel(channel) {
   }
 }
 
-// Control de Pantalla Completa
-function toggleVideoFullscreen() {
-  const wrapper = document.getElementById('video-wrapper');
-  if (!wrapper) return;
-  if (!document.fullscreenElement) {
-    if (wrapper.requestFullscreen) {
-      wrapper.requestFullscreen();
-    } else if (wrapper.webkitRequestFullscreen) {
-      wrapper.webkitRequestFullscreen();
-    }
-  } else {
-    if (document.exitFullscreen) {
-      document.exitFullscreen();
-    }
-  }
-}
 
 function closeVideoModal() {
   const modal = document.getElementById('video-modal');
