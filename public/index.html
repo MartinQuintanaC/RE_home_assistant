@@ -184,6 +184,9 @@
             allow="autoplay; fullscreen"
           ></iframe>
 
+          <!-- Máscara negra para ocultar botones redundantes de Pausa y Detener (transmisión en vivo pura) -->
+          <div class="absolute bottom-0 left-0 w-[64px] h-[38px] bg-black z-10 pointer-events-auto select-none"></div>
+
           <!-- Spinner de carga del stream -->
           <div id="video-spinner" class="absolute inset-0 bg-slate-950/75 backdrop-blur-sm flex flex-col items-center justify-center gap-3 transition-opacity">
             <div class="w-10 h-10 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin"></div>
