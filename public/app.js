@@ -619,15 +619,7 @@ async function loadStreamChannel(channel) {
         if (spinner) spinner.classList.add('opacity-0', 'pointer-events-none');
       }, 2500);
 
-      // Asegurar que use lang=en para evitar que OpenTraxx caiga por defecto en chino (zh-cn)
-      let playerUrl = data.wsPlayerUrl || '';
-      if (playerUrl.includes('lang=')) {
-        playerUrl = playerUrl.replace(/lang=[^&]+/g, 'lang=en');
-      } else if (playerUrl) {
-        playerUrl += '&lang=en';
-      }
-
-      iframeEl.src = playerUrl;
+      iframeEl.src = data.wsPlayerUrl;
     }
 
     if (techInfo) {
