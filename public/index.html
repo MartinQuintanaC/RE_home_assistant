@@ -176,10 +176,11 @@
         <!-- CONTENEDOR DE REPRODUCTOR DE VIDEO -->
         <div id="video-wrapper" class="relative w-full aspect-video bg-black overflow-hidden select-none">
           
-          <!-- Visor: Reproductor WebSocket Nativo (videoH5 / Canvas Wasm con tema oscuro) -->
+          <!-- Visor: Reproductor WebSocket Nativo (videoH5 / Canvas Wasm) -->
           <iframe 
             id="camera-iframe-player" 
             class="w-full h-full border-0 bg-black block" 
+            style="transform: scale(1.045); transform-origin: center center;"
             allow="autoplay; fullscreen"
           ></iframe>
 
