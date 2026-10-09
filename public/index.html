@@ -178,14 +178,15 @@
           </div>
         </div>
 
-        <!-- CONTENEDOR DE REPRODUCTOR DE VIDEO -->
+        <!-- CONTENEDOR DE REPRODUCTOR DE VIDEO (CCTV EN VIVO - BORDE A BORDE) -->
         <div id="video-wrapper" class="relative w-full aspect-video bg-black overflow-hidden select-none">
           
           <!-- Visor: Reproductor WebSocket Nativo (videoH5 / Canvas Wasm) -->
+          <!-- Recorte de márgenes y barra inferior para vista limpia en tiempo real sin botones de pausa/detener -->
           <iframe 
             id="camera-iframe-player" 
-            class="w-full h-full border-0 bg-black block" 
-            style="transform: scale(1.045); transform-origin: center center;"
+            class="absolute border-0 bg-black block" 
+            style="top: -8px; left: -10px; width: calc(100% + 20px); height: calc(100% + 56px);"
             allow="autoplay; fullscreen"
           ></iframe>
 
