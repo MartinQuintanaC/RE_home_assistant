@@ -552,6 +552,28 @@ async function openVideoModal(deviceId, vehicleName, isOnline, channelCount = 1)
   loadStreamChannel(currentVideoChannel);
 }
 
+let currentStreamEngine = 'ws'; // 'ws' (WebSocket en vivo) o 'hls'
+
+function setStreamEngine(engine) {
+  if (currentStreamEngine === engine) return;
+  currentStreamEngine = engine;
+
+  const btnWs = document.getElementById('btn-engine-ws');
+  const btnHls = document.getElementById('btn-engine-hls');
+
+  if (btnWs && btnHls) {
+    if (engine === 'ws') {
+      btnWs.className = 'flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 transition-all cursor-pointer';
+      btnHls.className = 'flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition-all cursor-pointer border-transparent';
+    } else {
+      btnHls.className = 'flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold bg-sky-500/20 text-sky-300 border border-sky-500/30 transition-all cursor-pointer';
+      btnWs.className = 'flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition-all cursor-pointer border-transparent';
+    }
+  }
+
+  loadStreamChannel(currentVideoChannel);
+}
+
 function renderChannelPills() {
   const pillsContainer = document.getElementById('video-channel-pills');
   if (!pillsContainer) return;
@@ -584,16 +606,17 @@ function retryCurrentChannel() {
 
 async function loadStreamChannel(channel) {
   const videoEl = document.getElementById('camera-video-player');
+  const iframeEl = document.getElementById('camera-iframe-player');
+  const cctvBar = document.getElementById('video-cctv-bar');
   const spinner = document.getElementById('video-spinner');
   const spinnerText = document.getElementById('video-spinner-text');
   const offlineAlert = document.getElementById('video-offline-alert');
-  const directLink = document.getElementById('video-player-direct-url');
   const techInfo = document.getElementById('video-stream-tech-info');
 
   if (spinner) spinner.classList.remove('opacity-0', 'pointer-events-none');
   if (spinnerText) spinnerText.textContent = `Conectando a canal CH${channel}...`;
 
-  // Detener y limpiar reproducción previa
+  // Detener y limpiar reproductor HLS previo
   if (currentHlsInstance) {
     currentHlsInstance.destroy();
     currentHlsInstance = null;
@@ -613,22 +636,44 @@ async function loadStreamChannel(channel) {
       return;
     }
 
-    if (directLink && data.playerUrl) {
-      directLink.href = data.playerUrl;
-    }
-
     // Si el dispositivo está fuera de línea
     if (!data.isOnline) {
       if (offlineAlert) offlineAlert.classList.remove('hidden');
       if (spinner) spinner.classList.add('opacity-0', 'pointer-events-none');
+      if (iframeEl) iframeEl.src = 'about:blank';
       return;
     } else {
       if (offlineAlert) offlineAlert.classList.add('hidden');
     }
 
+    // --- MODO 1: WEBSOCKET NATIVO (videoH5 / Canvas Wasm) ---
+    if (currentStreamEngine === 'ws') {
+      if (videoEl) videoEl.classList.add('hidden');
+      if (cctvBar) cctvBar.classList.add('hidden');
+      if (iframeEl) {
+        iframeEl.classList.remove('hidden');
+        iframeEl.onload = () => {
+          if (spinner) spinner.classList.add('opacity-0', 'pointer-events-none');
+        };
+        iframeEl.src = data.wsPlayerUrl;
+      }
+      if (techInfo) {
+        techInfo.textContent = `CH${channel} • WebSocket Wasm (Tiempo Real) • MDVR ${escapeHtml(currentVehicleName)}`;
+      }
+      return;
+    }
+
+    // --- MODO 2: HLS (HTTP Live Streaming) ---
+    if (iframeEl) {
+      iframeEl.classList.add('hidden');
+      iframeEl.src = 'about:blank';
+    }
+    if (videoEl) videoEl.classList.remove('hidden');
+    if (cctvBar) cctvBar.classList.remove('hidden');
+
     const streamUrl = data.streamUrl;
     if (techInfo) {
-      techInfo.textContent = `CH${channel} • HLS Puerto 16604 • Baja Latencia • MDVR ${escapeHtml(currentVehicleName)}`;
+      techInfo.textContent = `CH${channel} • HLS Puerto 16604 • MDVR ${escapeHtml(currentVehicleName)}`;
     }
 
     // Inicializar reproductor Hls.js calibrado para estabilidad y fluidez continua
@@ -749,8 +794,13 @@ function stopLiveClock() {
 function closeVideoModal() {
   const modal = document.getElementById('video-modal');
   const videoEl = document.getElementById('camera-video-player');
+  const iframeEl = document.getElementById('camera-iframe-player');
 
   stopLiveClock();
+
+  if (iframeEl) {
+    iframeEl.src = 'about:blank';
+  }
 
   if (currentHlsInstance) {
     currentHlsInstance.destroy();
