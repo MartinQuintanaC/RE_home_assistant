@@ -184,12 +184,6 @@
             allow="autoplay; fullscreen"
           ></iframe>
 
-          <!-- Máscara inferior para cubrir cualquier borde blanco residual nativo de videoH5 -->
-          <div class="absolute bottom-0 inset-x-0 h-3 bg-black pointer-events-none z-10"></div>
-
-          <!-- Máscara para ocultar botones 'Pausar/Continuar' y 'Detener' de la izquierda -->
-          <div class="absolute bottom-0 left-0 w-[64px] h-[48px] bg-black z-20 pointer-events-auto" title="Transmisión en Vivo Continua"></div>
-
           <!-- Spinner de carga del stream -->
           <div id="video-spinner" class="absolute inset-0 bg-slate-950/75 backdrop-blur-sm flex flex-col items-center justify-center gap-3 transition-opacity">
             <div class="w-10 h-10 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin"></div>
