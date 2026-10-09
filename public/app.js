@@ -504,8 +504,7 @@ function showToast(message) {
   }, 2500);
 }
 
-// 7. GESTIÓN DEL VISOR DE VIDEO EN VIVO (HLS / OPENTRAXX)
-let currentHlsInstance = null;
+// 7. GESTIÓN DEL VISOR DE VIDEO EN VIVO (WEBSOCKET NATIVO / OPENTRAXX)
 let currentVideoDevice = null;
 let currentVideoChannel = 1;
 let currentVehicleName = '';
@@ -545,32 +544,9 @@ async function openVideoModal(deviceId, vehicleName, isOnline, channelCount = 1)
 
   // Abrir ventana modal
   if (modal) modal.classList.remove('hidden');
-  startLiveClock();
   refreshIcons();
 
   // Iniciar carga del canal 1
-  loadStreamChannel(currentVideoChannel);
-}
-
-let currentStreamEngine = 'ws'; // 'ws' (WebSocket en vivo) o 'hls'
-
-function setStreamEngine(engine) {
-  if (currentStreamEngine === engine) return;
-  currentStreamEngine = engine;
-
-  const btnWs = document.getElementById('btn-engine-ws');
-  const btnHls = document.getElementById('btn-engine-hls');
-
-  if (btnWs && btnHls) {
-    if (engine === 'ws') {
-      btnWs.className = 'flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 transition-all cursor-pointer';
-      btnHls.className = 'flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition-all cursor-pointer border-transparent';
-    } else {
-      btnHls.className = 'flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold bg-sky-500/20 text-sky-300 border border-sky-500/30 transition-all cursor-pointer';
-      btnWs.className = 'flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition-all cursor-pointer border-transparent';
-    }
-  }
-
   loadStreamChannel(currentVideoChannel);
 }
 
@@ -605,9 +581,7 @@ function retryCurrentChannel() {
 }
 
 async function loadStreamChannel(channel) {
-  const videoEl = document.getElementById('camera-video-player');
   const iframeEl = document.getElementById('camera-iframe-player');
-  const cctvBar = document.getElementById('video-cctv-bar');
   const spinner = document.getElementById('video-spinner');
   const spinnerText = document.getElementById('video-spinner-text');
   const offlineAlert = document.getElementById('video-offline-alert');
@@ -615,17 +589,6 @@ async function loadStreamChannel(channel) {
 
   if (spinner) spinner.classList.remove('opacity-0', 'pointer-events-none');
   if (spinnerText) spinnerText.textContent = `Conectando a canal CH${channel}...`;
-
-  // Detener y limpiar reproductor HLS previo
-  if (currentHlsInstance) {
-    currentHlsInstance.destroy();
-    currentHlsInstance = null;
-  }
-  if (videoEl) {
-    videoEl.pause();
-    videoEl.removeAttribute('src');
-    videoEl.load();
-  }
 
   try {
     const res = await fetch(`/api/opentraxx/video/${currentVideoDevice}?channel=${channel}`);
@@ -646,92 +609,21 @@ async function loadStreamChannel(channel) {
       if (offlineAlert) offlineAlert.classList.add('hidden');
     }
 
-    // --- MODO 1: WEBSOCKET NATIVO (videoH5 / Canvas Wasm) ---
-    if (currentStreamEngine === 'ws') {
-      if (videoEl) videoEl.classList.add('hidden');
-      if (cctvBar) cctvBar.classList.add('hidden');
-      if (iframeEl) {
-        iframeEl.classList.remove('hidden');
-        iframeEl.onload = () => {
-          if (spinner) spinner.classList.add('opacity-0', 'pointer-events-none');
-        };
-        iframeEl.src = data.wsPlayerUrl;
-      }
-      if (techInfo) {
-        techInfo.textContent = `CH${channel} • WebSocket Wasm (Tiempo Real) • MDVR ${escapeHtml(currentVehicleName)}`;
-      }
-      return;
-    }
-
-    // --- MODO 2: HLS (HTTP Live Streaming) ---
+    // Cargar reproductor nativo WebSocket (videoH5 / Canvas Wasm)
     if (iframeEl) {
-      iframeEl.classList.add('hidden');
-      iframeEl.src = 'about:blank';
-    }
-    if (videoEl) videoEl.classList.remove('hidden');
-    if (cctvBar) cctvBar.classList.remove('hidden');
+      iframeEl.onload = () => {
+        if (spinner) spinner.classList.add('opacity-0', 'pointer-events-none');
+      };
+      // Fallback para ocultar spinner si onload ya disparó
+      setTimeout(() => {
+        if (spinner) spinner.classList.add('opacity-0', 'pointer-events-none');
+      }, 2500);
 
-    const streamUrl = data.streamUrl;
+      iframeEl.src = data.wsPlayerUrl;
+    }
+
     if (techInfo) {
-      techInfo.textContent = `CH${channel} • HLS Puerto 16604 • MDVR ${escapeHtml(currentVehicleName)}`;
-    }
-
-    // Inicializar reproductor Hls.js calibrado para estabilidad y fluidez continua
-    if (window.Hls && window.Hls.isSupported()) {
-      const hls = new Hls({
-        enableWorker: true,
-        lowLatencyMode: true,
-        liveSyncDuration: 4, // 4 segundos exactos de retraso (en vez de multiplicar por los 20s de OpenTraxx)
-        liveMaxLatencyDuration: 8, // Máximo 8 segundos de tolerancia antes de acelerar
-        maxLiveSyncPlaybackRate: 1.2, // Acelera suavemente un 20% si hay desfase sin pausar el video
-        liveDurationInfinity: true,
-        backBufferLength: 0,
-        maxBufferLength: 6,
-      });
-
-      currentHlsInstance = hls;
-      hls.loadSource(streamUrl);
-      hls.attachMedia(videoEl);
-
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        if (spinner) spinner.classList.add('opacity-0', 'pointer-events-none');
-        videoEl.muted = true; // Silenciado al inicio para evitar restricciones de autoplay
-        updateMuteButtonUI();
-        if (hls.liveSyncPosition) {
-          videoEl.currentTime = hls.liveSyncPosition;
-        }
-        videoEl.play().catch(e => console.log('Autoplay silencioso requerido por el navegador:', e));
-      });
-
-      hls.on(Hls.Events.ERROR, (event, errorData) => {
-        console.warn('⚠️ [HLS Stream Event]:', errorData);
-        if (errorData.fatal) {
-          switch (errorData.type) {
-            case Hls.ErrorTypes.NETWORK_ERROR:
-              if (spinnerText) spinnerText.textContent = 'Esperando paquetes de video de la cámara...';
-              hls.startLoad();
-              break;
-            case Hls.ErrorTypes.MEDIA_ERROR:
-              hls.recoverMediaError();
-              break;
-            default:
-              hls.destroy();
-              if (spinnerText) spinnerText.textContent = 'Señal pausada por el dispositivo vehicular.';
-              break;
-          }
-        }
-      });
-    } else if (videoEl && videoEl.canPlayType('application/vnd.apple.mpegurl')) {
-      // Soporte nativo HLS para Safari en iOS / macOS
-      videoEl.src = streamUrl;
-      videoEl.addEventListener('loadedmetadata', () => {
-        if (spinner) spinner.classList.add('opacity-0', 'pointer-events-none');
-        videoEl.muted = true;
-        updateMuteButtonUI();
-        videoEl.play().catch(e => console.log('Autoplay Safari:', e));
-      });
-    } else {
-      if (spinnerText) spinnerText.textContent = 'Este navegador no soporta streaming HLS.';
+      techInfo.textContent = `CH${channel} • WebSocket Wasm (Tiempo Real) • MDVR ${escapeHtml(currentVehicleName)}`;
     }
 
   } catch (err) {
@@ -740,25 +632,10 @@ async function loadStreamChannel(channel) {
   }
 }
 
-// Control de Mute / Audio
-function toggleVideoMute() {
-  const videoEl = document.getElementById('camera-video-player');
-  if (!videoEl) return;
-  videoEl.muted = !videoEl.muted;
-  updateMuteButtonUI();
-}
-
-function updateMuteButtonUI() {
-  const videoEl = document.getElementById('camera-video-player');
-  const muteIcon = document.getElementById('mute-icon');
-  if (!videoEl || !muteIcon) return;
-  muteIcon.setAttribute('data-lucide', videoEl.muted ? 'volume-x' : 'volume-2');
-  refreshIcons();
-}
-
 // Control de Pantalla Completa
 function toggleVideoFullscreen() {
-  const wrapper = document.getElementById('video-wrapper') || document.getElementById('camera-video-player');
+  const wrapper = document.getElementById('video-wrapper');
+  if (!wrapper) return;
   if (!document.fullscreenElement) {
     if (wrapper.requestFullscreen) {
       wrapper.requestFullscreen();
@@ -772,45 +649,12 @@ function toggleVideoFullscreen() {
   }
 }
 
-// Reloj en tiempo real para la barra de estado CCTV
-let liveClockInterval = null;
-function startLiveClock() {
-  stopLiveClock();
-  const timeEl = document.getElementById('live-time-display');
-  const update = () => {
-    if (timeEl) timeEl.textContent = new Date().toLocaleTimeString();
-  };
-  update();
-  liveClockInterval = setInterval(update, 1000);
-}
-
-function stopLiveClock() {
-  if (liveClockInterval) {
-    clearInterval(liveClockInterval);
-    liveClockInterval = null;
-  }
-}
-
 function closeVideoModal() {
   const modal = document.getElementById('video-modal');
-  const videoEl = document.getElementById('camera-video-player');
   const iframeEl = document.getElementById('camera-iframe-player');
-
-  stopLiveClock();
 
   if (iframeEl) {
     iframeEl.src = 'about:blank';
-  }
-
-  if (currentHlsInstance) {
-    currentHlsInstance.destroy();
-    currentHlsInstance = null;
-  }
-
-  if (videoEl) {
-    videoEl.pause();
-    videoEl.removeAttribute('src');
-    videoEl.load();
   }
 
   if (modal) modal.classList.add('hidden');

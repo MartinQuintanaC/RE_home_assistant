@@ -9,8 +9,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- HLS.js Video Streaming Library CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <style>
     .glass-card {
       background: rgba(30, 41, 59, 0.7);
@@ -141,18 +139,28 @@
             </div>
           </div>
 
-          <button 
-            onclick="closeVideoModal()" 
-            class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition-all cursor-pointer"
-            title="Cerrar reproductor"
-          >
-            <i data-lucide="x" class="w-5 h-5"></i>
-          </button>
+          <div class="flex items-center gap-2">
+            <button 
+              id="btn-video-fullscreen" 
+              onclick="toggleVideoFullscreen()" 
+              class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition-all cursor-pointer"
+              title="Pantalla Completa"
+            >
+              <i data-lucide="maximize" class="w-5 h-5"></i>
+            </button>
+            <button 
+              onclick="closeVideoModal()" 
+              class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition-all cursor-pointer"
+              title="Cerrar reproductor"
+            >
+              <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+          </div>
         </div>
 
-        <!-- SELECTOR DE CANALES Y MOTOR DE STREAMING (WEBSOCKET VS HLS) -->
+        <!-- SELECTOR DE CANALES Y DETALLES EN VIVO (WEBSOCKET NATIVO) -->
         <div class="px-4 py-2 bg-slate-900/60 border-b border-slate-800/80 flex flex-wrap items-center justify-between gap-3">
-          <!-- Canales -->
+          <!-- Canales de cámara -->
           <div class="flex items-center gap-2 overflow-x-auto py-1">
             <span class="text-xs font-semibold text-slate-400 shrink-0 mr-1 flex items-center gap-1.5">
               <i data-lucide="camera" class="w-3.5 h-3.5 text-indigo-400"></i>
@@ -163,83 +171,32 @@
             </div>
           </div>
 
-          <!-- Selector de Motor (WebSocket vs HLS) -->
-          <div class="flex items-center gap-1 p-0.5 rounded-xl bg-slate-950/80 border border-slate-800 shrink-0">
-            <button 
-              id="btn-engine-ws" 
-              onclick="setStreamEngine('ws')" 
-              class="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 transition-all cursor-pointer"
-              title="Streaming directo por WebSocket (Baja Latencia)"
-            >
-              <i data-lucide="zap" class="w-3 h-3 text-emerald-400"></i>
-              <span>⚡ WebSocket (En Vivo)</span>
-            </button>
-            <button 
-              id="btn-engine-hls" 
-              onclick="setStreamEngine('hls')" 
-              class="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition-all cursor-pointer"
-              title="Streaming por segmentos HLS"
-            >
-              <i data-lucide="film" class="w-3 h-3"></i>
-              <span>HLS</span>
-            </button>
+          <!-- Indicador WebSocket y Tip de uso -->
+          <div class="flex items-center gap-3 shrink-0">
+            <span class="hidden md:inline text-[11px] text-slate-400 font-medium">
+              💡 Doble clic en cualquier cuadro para agrandar
+            </span>
+            <div class="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>WebSocket en Vivo</span>
+            </div>
           </div>
         </div>
 
         <!-- CONTENEDOR DE REPRODUCTOR DE VIDEO -->
         <div id="video-wrapper" class="relative w-full aspect-video bg-black flex items-center justify-center overflow-hidden group select-none">
           
-          <!-- Visor 1: Reproductor WebSocket Nativo (videoH5 / Canvas Wasm) -->
+          <!-- Visor: Reproductor WebSocket Nativo (videoH5 / Canvas Wasm) -->
           <iframe 
             id="camera-iframe-player" 
             class="w-full h-full border-0 rounded-xl bg-black" 
             allow="autoplay; fullscreen"
           ></iframe>
 
-          <!-- Visor 2: Elemento de video HTML5 HLS -->
-          <video 
-            id="camera-video-player" 
-            class="w-full h-full object-contain cursor-default hidden" 
-            autoplay 
-            playsinline
-          ></video>
-
-          <!-- BARRA DE CONTROLES FLOTANTE CCTV (Para modo HLS) -->
-          <div id="video-cctv-bar" class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent px-4 py-3 flex items-center justify-between pointer-events-auto transition-opacity duration-300 hidden">
-            <!-- Indicador EN VIVO y reloj -->
-            <div class="flex items-center gap-2.5">
-              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-600/90 text-white text-[11px] font-bold uppercase tracking-wider shadow-lg shadow-rose-600/30">
-                <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
-                <span>EN VIVO</span>
-              </span>
-              <span id="live-time-display" class="text-xs font-mono text-slate-300 tracking-wide"></span>
-            </div>
-
-            <!-- Botones de Audio y Pantalla Completa únicamente -->
-            <div class="flex items-center gap-2">
-              <button 
-                id="btn-video-mute" 
-                onclick="toggleVideoMute()" 
-                class="p-2 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-slate-200 border border-slate-700/80 transition-all cursor-pointer active:scale-95"
-                title="Silenciar / Activar Audio"
-              >
-                <i id="mute-icon" data-lucide="volume-2" class="w-4 h-4"></i>
-              </button>
-              <button 
-                id="btn-video-fullscreen" 
-                onclick="toggleVideoFullscreen()" 
-                class="p-2 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-slate-200 border border-slate-700/80 transition-all cursor-pointer active:scale-95"
-                title="Pantalla Completa"
-              >
-                <i data-lucide="maximize" class="w-4 h-4"></i>
-              </button>
-            </div>
-          </div>
-
           <!-- Spinner de carga del stream -->
           <div id="video-spinner" class="absolute inset-0 bg-slate-950/75 backdrop-blur-sm flex flex-col items-center justify-center gap-3 transition-opacity">
             <div class="w-10 h-10 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin"></div>
-            <p id="video-spinner-text" class="text-xs font-medium text-slate-300">Conectando al stream en vivo (HLS)...</p>
+            <p id="video-spinner-text" class="text-xs font-medium text-slate-300">Conectando al stream en vivo (WebSocket)...</p>
           </div>
 
           <!-- Mensaje cuando el equipo está desconectado -->
@@ -250,7 +207,7 @@
             <div class="max-w-md">
               <h4 class="font-bold text-slate-200 text-sm mb-1">Cámara Vehicular Fuera de Línea</h4>
               <p class="text-xs text-slate-400 leading-relaxed">
-                El vehículo actualmente se encuentra apagado o sin conexión celular móvil. El streaming HLS estará disponible inmediatamente cuando el motor o contacto sea encendido.
+                El vehículo actualmente se encuentra apagado o sin conexión celular móvil. El streaming de video en vivo estará disponible inmediatamente cuando el motor o contacto sea encendido.
               </p>
             </div>
             <button 
@@ -267,8 +224,8 @@
         <!-- PIE DEL MODAL -->
         <div class="p-3 sm:px-5 sm:py-3 border-t border-slate-800/80 bg-slate-900/60 flex flex-wrap items-center justify-between gap-3 text-xs">
           <div class="flex items-center gap-2 text-slate-400">
-            <span class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>
-            <span id="video-stream-tech-info">HLS v3 • Puerto Seguro 16604 • Baja Latencia</span>
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span id="video-stream-tech-info">WebSocket Wasm • Puerto Seguro 16604 • Tiempo Real</span>
           </div>
 
           <div>
