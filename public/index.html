@@ -10,47 +10,58 @@
   <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
+    html, body {
+      overflow-x: hidden;
+      max-width: 100vw;
+    }
     .glass-card {
       background: rgba(30, 41, 59, 0.7);
       backdrop-filter: blur(12px);
       border: 1px solid rgba(255, 255, 255, 0.08);
     }
+    .scrollbar-none::-webkit-scrollbar {
+      display: none;
+    }
+    .scrollbar-none {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
   </style>
 </head>
 
 <body
-  class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-sky-500 selection:text-white">
+  class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-sky-500 selection:text-white overflow-x-hidden">
 
   <!-- BARRA SUPERIOR -->
-  <header class="border-b border-slate-800/80 bg-slate-900/60 backdrop-blur sticky top-0 z-50">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-      <div class="flex items-center gap-3">
+  <header class="border-b border-slate-800/80 bg-slate-900/60 backdrop-blur sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-2 min-w-0">
+      <div class="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
         <div
-          class="p-2.5 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 text-white shadow-lg shadow-sky-500/20">
-          <i data-lucide="layers" class="w-6 h-6"></i>
+          class="p-2 sm:p-2.5 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 text-white shadow-lg shadow-sky-500/20 shrink-0">
+          <i data-lucide="layers" class="w-5 h-5 sm:w-6 sm:h-6"></i>
         </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <h1 class="font-bold text-lg leading-tight tracking-tight">Hub de Dispositivos Multi-Plataforma</h1>
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+            <h1 class="font-bold text-sm sm:text-base md:text-lg leading-tight tracking-tight truncate">Hub de Dispositivos Multi-Plataforma</h1>
             <span
-              class="px-2 py-0.5 text-[10px] font-semibold tracking-wider uppercase rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+              class="hidden sm:inline-flex px-1.5 py-0.5 text-[9px] sm:text-[10px] font-semibold tracking-wider uppercase rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shrink-0">
               HA + 808GPS
             </span>
           </div>
-          <p class="text-xs text-slate-400" id="header-subtitle">Cargando dispositivos...</p>
+          <p class="text-[11px] sm:text-xs text-slate-400 truncate" id="header-subtitle">Cargando dispositivos...</p>
         </div>
       </div>
 
       <!-- Acciones de cabecera -->
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2 sm:gap-3 shrink-0">
         <button id="btn-sync" onclick="syncCurrentTab()" title="Sincronizar cambios desde ambas APIs"
-          class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-xs text-slate-300 border border-slate-700/60 transition-all cursor-pointer active:scale-95">
+          class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-xs text-slate-300 border border-slate-700/60 transition-all cursor-pointer active:scale-95 shrink-0">
           <i id="sync-icon" data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
           <span class="hidden sm:inline">Sincronizar</span>
         </button>
 
         <div id="connection-badge"
-          class="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-emerald-950/80 text-emerald-400 border border-emerald-800/60 shadow-sm transition-all duration-300">
+          class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-medium bg-emerald-950/80 text-emerald-400 border border-emerald-800/60 shadow-sm transition-all duration-300 shrink-0">
           <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
           <span id="connection-text">En Vivo</span>
         </div>
@@ -58,25 +69,27 @@
     </div>
 
     <!-- SELECTOR DE LOS 2 APARTADOS (PESTAÑAS) -->
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 pt-1 pb-3">
-      <div class="flex items-center gap-2 p-1 rounded-xl bg-slate-900/80 border border-slate-800/80 w-fit">
+    <div class="max-w-6xl mx-auto px-3 sm:px-6 pt-1 pb-3">
+      <div class="grid grid-cols-2 sm:flex items-center gap-1.5 sm:gap-2 p-1 rounded-xl bg-slate-900/80 border border-slate-800/80 w-full sm:w-fit">
         <button id="tab-btn-ha" onclick="switchTab('ha')"
-          class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer bg-sky-500 text-white shadow-sm">
-          <i data-lucide="home" class="w-4 h-4"></i>
-          <span>1. Domótica IoT (Home Assistant)</span>
-          <span id="badge-ha-count" class="px-1.5 py-0.2 rounded-full bg-sky-600 text-[10px]">0</span>
+          class="flex items-center justify-center sm:justify-start gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer bg-sky-500 text-white shadow-sm min-w-0">
+          <i data-lucide="home" class="w-4 h-4 shrink-0"></i>
+          <span class="truncate sm:hidden">1. Home Assistant</span>
+          <span class="truncate hidden sm:inline">1. Domótica IoT (Home Assistant)</span>
+          <span id="badge-ha-count" class="px-1.5 py-0.2 rounded-full bg-sky-600 text-[10px] shrink-0">0</span>
         </button>
 
         <button id="tab-btn-otx" onclick="switchTab('otx')"
-          class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
-          <i data-lucide="navigation" class="w-4 h-4"></i>
-          <span>2. Flota & Telemetría GPS (OpenTraxx)</span>
-          <span id="badge-otx-count" class="px-1.5 py-0.2 rounded-full bg-slate-800 text-[10px]">0</span>
+          class="flex items-center justify-center sm:justify-start gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition-all cursor-pointer min-w-0">
+          <i data-lucide="navigation" class="w-4 h-4 shrink-0"></i>
+          <span class="truncate sm:hidden">2. OpenTraxx GPS</span>
+          <span class="truncate hidden sm:inline">2. Flota & Telemetría GPS (OpenTraxx)</span>
+          <span id="badge-otx-count" class="px-1.5 py-0.2 rounded-full bg-slate-800 text-[10px] shrink-0">0</span>
         </button>
 
         <button id="tab-btn-both" onclick="switchTab('both')"
-          class="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
-          <i data-lucide="columns" class="w-3.5 h-3.5"></i>
+          class="col-span-2 hidden md:flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
+          <i data-lucide="columns" class="w-3.5 h-3.5 shrink-0"></i>
           <span>Ver Ambos</span>
         </button>
       </div>
@@ -84,64 +97,62 @@
   </header>
 
   <!-- CONTENIDO PRINCIPAL: APARTADOS -->
-  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 space-y-8">
+  <main class="flex-1 max-w-6xl w-full mx-auto px-3 sm:px-6 py-4 sm:py-6 space-y-6 sm:space-y-8 min-w-0">
 
     <!-- APARTADO 1: HOME ASSISTANT -->
     <section id="section-ha" class="space-y-4">
-      <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-slate-800/80 pb-2">
         <div class="flex items-center gap-2">
-          <i data-lucide="cpu" class="w-5 h-5 text-sky-400"></i>
-          <h2 class="text-base font-bold text-slate-100 uppercase tracking-wider">Apartado 1: Dispositivos IoT (Home
-            Assistant)</h2>
+          <i data-lucide="cpu" class="w-5 h-5 text-sky-400 shrink-0"></i>
+          <h2 class="text-sm sm:text-base font-bold text-slate-100 uppercase tracking-wider">Apartado 1: Dispositivos IoT (Home Assistant)</h2>
         </div>
-        <span class="text-xs text-slate-400">Conexión Docker :3000</span>
+        <span class="text-[11px] sm:text-xs text-slate-400">Conexión Docker :3000</span>
       </div>
 
-      <div id="devices-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div id="devices-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
         <!-- Los apartados de Home Assistant se renderizan aquí -->
       </div>
     </section>
 
     <!-- APARTADO 2: OPENTRAXX (808GPS) -->
     <section id="section-otx" class="space-y-4">
-      <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-slate-800/80 pb-2">
         <div class="flex items-center gap-2">
-          <i data-lucide="map-pin" class="w-5 h-5 text-emerald-400"></i>
-          <h2 class="text-base font-bold text-slate-100 uppercase tracking-wider">Apartado 2: Flota & GPS (OpenTraxx
-            808GPS)</h2>
+          <i data-lucide="map-pin" class="w-5 h-5 text-emerald-400 shrink-0"></i>
+          <h2 class="text-sm sm:text-base font-bold text-slate-100 uppercase tracking-wider">Apartado 2: Flota & GPS (OpenTraxx 808GPS)</h2>
         </div>
-        <span class="text-xs text-slate-400" id="otx-sync-time">Último reporte en nube</span>
+        <span class="text-[11px] sm:text-xs text-slate-400" id="otx-sync-time">Último reporte en nube</span>
       </div>
 
-      <div id="vehicles-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div id="vehicles-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
         <!-- Los vehículos de OpenTraxx se renderizan aquí -->
       </div>
     </section>
 
     <!-- MODAL DE TRANSMISIÓN DE VIDEO EN VIVO (OPENTRAXX) -->
-    <div id="video-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 transition-all duration-300 hidden">
-      <div class="max-w-4xl w-full glass-card rounded-2xl border border-slate-700/80 shadow-2xl flex flex-col overflow-hidden max-h-[95vh]">
+    <div id="video-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 md:p-6 transition-all duration-300 hidden overflow-y-auto">
+      <div class="w-full max-w-4xl min-w-0 glass-card rounded-2xl border border-slate-700/80 shadow-2xl flex flex-col overflow-hidden max-h-[96vh] my-auto">
         
         <!-- ENCABEZADO DEL MODAL -->
-        <div class="flex items-center justify-between p-4 border-b border-slate-800/80 bg-slate-900/60">
-          <div class="flex items-center gap-3">
-            <div class="p-2 rounded-xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
-              <i data-lucide="video" class="w-5 h-5"></i>
+        <div class="flex items-center justify-between p-3 sm:p-4 border-b border-slate-800/80 bg-slate-900/60 gap-2 min-w-0">
+          <div class="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+            <div class="p-2 rounded-xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 shrink-0">
+              <i data-lucide="video" class="w-4 h-4 sm:w-5 sm:h-5"></i>
             </div>
-            <div>
-              <div class="flex items-center gap-2">
-                <h3 id="video-modal-title" class="font-bold text-slate-100 text-base">Cámara en Vivo</h3>
-                <span id="video-modal-status-badge" class="px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-1.5 sm:gap-2">
+                <h3 id="video-modal-title" class="font-bold text-slate-100 text-sm sm:text-base truncate">Cámara en Vivo</h3>
+                <span id="video-modal-status-badge" class="px-2 py-0.5 text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shrink-0">
                   En línea
                 </span>
               </div>
-              <p id="video-modal-subtitle" class="text-xs text-slate-400">ID: -- • MDVR OpenTraxx</p>
+              <p id="video-modal-subtitle" class="text-[11px] sm:text-xs text-slate-400 truncate">ID: -- • MDVR OpenTraxx</p>
             </div>
           </div>
 
           <button 
             onclick="closeVideoModal()" 
-            class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition-all cursor-pointer"
+            class="p-1.5 sm:p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition-all cursor-pointer shrink-0"
             title="Cerrar reproductor"
           >
             <i data-lucide="x" class="w-5 h-5"></i>
@@ -149,27 +160,27 @@
         </div>
 
         <!-- SELECTOR DE CANALES Y DETALLES EN VIVO (WEBSOCKET NATIVO) -->
-        <div class="px-4 py-2 bg-slate-900/60 border-b border-slate-800/80 flex flex-wrap items-center justify-between gap-3">
+        <div class="px-3 py-2 sm:px-4 sm:py-2.5 bg-slate-900/60 border-b border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2 min-w-0">
           <!-- Canales de cámara -->
-          <div class="flex items-center gap-2 overflow-x-auto py-1">
-            <span class="text-xs font-semibold text-slate-400 shrink-0 mr-1 flex items-center gap-1.5">
+          <div class="flex items-center gap-1.5 sm:gap-2 overflow-x-auto min-w-0 py-0.5 w-full sm:w-auto scrollbar-none">
+            <span class="text-xs font-semibold text-slate-400 shrink-0 mr-1 flex items-center gap-1">
               <i data-lucide="camera" class="w-3.5 h-3.5 text-indigo-400"></i>
               Canal:
             </span>
-            <div id="video-channel-pills" class="flex items-center gap-1.5">
+            <div id="video-channel-pills" class="flex items-center gap-1.5 shrink-0">
               <!-- Botones de canales generados dinámicamente -->
             </div>
           </div>
 
           <!-- Botón de Sincronización en Vivo y Tip de uso -->
-          <div class="flex items-center gap-3 shrink-0">
+          <div class="flex items-center justify-between sm:justify-end gap-2 shrink-0 w-full sm:w-auto pt-1 sm:pt-0 border-t sm:border-t-0 border-slate-800/60">
             <span class="hidden md:inline text-[11px] text-slate-400 font-medium">
               💡 Doble clic para agrandar
             </span>
             <button 
               id="btn-sync-live" 
               onclick="syncLiveStream()" 
-              class="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 hover:text-emerald-300 text-xs font-semibold cursor-pointer transition-all active:scale-95 shadow-sm"
+              class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 hover:text-emerald-300 text-[11px] sm:text-xs font-semibold cursor-pointer transition-all active:scale-95 shadow-sm ml-auto sm:ml-0"
               title="Volver al momento exacto en vivo sin retraso"
             >
               <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -184,32 +195,32 @@
           <!-- Visor: Reproductor WebSocket Nativo (videoH5 / Canvas Wasm) -->
           <iframe 
             id="camera-iframe-player" 
-            class="w-full h-full border-0 bg-black block" 
-            style="transform: scale(1.045); transform-origin: center center;"
+            class="absolute border-0 bg-black block" 
+            style="top: -10px; left: -10px; width: calc(100% + 34px); height: calc(100% + 34px);"
             allow="autoplay; fullscreen"
           ></iframe>
 
           <!-- Spinner de carga del stream -->
           <div id="video-spinner" class="absolute inset-0 bg-slate-950/75 backdrop-blur-sm flex flex-col items-center justify-center gap-3 transition-opacity">
-            <div class="w-10 h-10 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin"></div>
-            <p id="video-spinner-text" class="text-xs font-medium text-slate-300">Conectando al stream en vivo (WebSocket)...</p>
+            <div class="w-8 h-8 sm:w-10 sm:h-10 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin"></div>
+            <p id="video-spinner-text" class="text-xs font-medium text-slate-300 px-4 text-center">Conectando al stream en vivo (WebSocket)...</p>
           </div>
 
           <!-- Mensaje cuando el equipo está desconectado -->
-          <div id="video-offline-alert" class="absolute inset-0 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center gap-3 hidden">
-            <div class="p-3 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20">
-              <i data-lucide="wifi-off" class="w-8 h-8"></i>
+          <div id="video-offline-alert" class="absolute inset-0 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-4 sm:p-6 text-center gap-3 hidden">
+            <div class="p-2.5 sm:p-3 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20">
+              <i data-lucide="wifi-off" class="w-6 h-6 sm:w-8 sm:h-8"></i>
             </div>
             <div class="max-w-md">
-              <h4 class="font-bold text-slate-200 text-sm mb-1">Cámara Vehicular Fuera de Línea</h4>
-              <p class="text-xs text-slate-400 leading-relaxed">
+              <h4 class="font-bold text-slate-200 text-xs sm:text-sm mb-1">Cámara Vehicular Fuera de Línea</h4>
+              <p class="text-[11px] sm:text-xs text-slate-400 leading-relaxed">
                 El vehículo actualmente se encuentra apagado o sin conexión celular móvil. El streaming de video en vivo estará disponible inmediatamente cuando el motor o contacto sea encendido.
               </p>
             </div>
             <button 
               id="btn-retry-video" 
               onclick="retryCurrentChannel()" 
-              class="mt-2 flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-300 border border-slate-700 cursor-pointer"
+              class="mt-1 sm:mt-2 flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-300 border border-slate-700 cursor-pointer"
             >
               <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
               <span>Reintentar Conexión</span>
@@ -218,16 +229,16 @@
         </div>
 
         <!-- PIE DEL MODAL -->
-        <div class="p-3 sm:px-5 sm:py-3 border-t border-slate-800/80 bg-slate-900/60 flex flex-wrap items-center justify-between gap-3 text-xs">
-          <div class="flex items-center gap-2 text-slate-400">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span id="video-stream-tech-info">WebSocket Wasm • Puerto Seguro 16604 • Tiempo Real</span>
+        <div class="p-2.5 sm:px-5 sm:py-3 border-t border-slate-800/80 bg-slate-900/60 flex items-center justify-between gap-2 text-[10px] sm:text-xs min-w-0">
+          <div class="flex items-center gap-1.5 sm:gap-2 text-slate-400 min-w-0 flex-1">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+            <span id="video-stream-tech-info" class="truncate">WebSocket Wasm • Puerto Seguro 16604 • Tiempo Real</span>
           </div>
 
-          <div>
+          <div class="shrink-0">
             <button 
               onclick="closeVideoModal()" 
-              class="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium shadow-md shadow-indigo-600/20 cursor-pointer"
+              class="px-3 py-1 sm:px-4 sm:py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium shadow-md shadow-indigo-600/20 cursor-pointer text-xs"
             >
               Cerrar
             </button>

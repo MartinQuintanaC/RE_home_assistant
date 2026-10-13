@@ -15,25 +15,25 @@ function switchTab(tab) {
   const btnOTX = document.getElementById('tab-btn-otx');
   const btnBoth = document.getElementById('tab-btn-both');
 
-  // Reset clases de botones
-  [btnHA, btnOTX, btnBoth].forEach(btn => {
-    if (btn) {
-      btn.className = 'flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition-all cursor-pointer';
-    }
-  });
+  const baseInactive = 'flex items-center justify-center sm:justify-start gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition-all cursor-pointer min-w-0';
+  const baseActive = 'flex items-center justify-center sm:justify-start gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer min-w-0 shadow-sm text-white';
+
+  if (btnHA) btnHA.className = baseInactive;
+  if (btnOTX) btnOTX.className = baseInactive;
+  if (btnBoth) btnBoth.className = 'col-span-2 hidden md:flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition-all cursor-pointer';
 
   if (tab === 'ha') {
     secHA.classList.remove('hidden');
     secOTX.classList.add('hidden');
-    btnHA.className = 'flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer bg-sky-500 text-white shadow-sm';
+    if (btnHA) btnHA.className = `${baseActive} bg-sky-500`;
   } else if (tab === 'otx') {
     secHA.classList.add('hidden');
     secOTX.classList.remove('hidden');
-    btnOTX.className = 'flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer bg-emerald-600 text-white shadow-sm';
+    if (btnOTX) btnOTX.className = `${baseActive} bg-emerald-600`;
   } else if (tab === 'both') {
     secHA.classList.remove('hidden');
     secOTX.classList.remove('hidden');
-    btnBoth.className = 'flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer bg-indigo-600 text-white shadow-sm';
+    if (btnBoth) btnBoth.className = 'col-span-2 hidden md:flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer bg-indigo-600 text-white shadow-sm';
   }
 
   refreshIcons();
@@ -87,22 +87,22 @@ function renderDevices() {
     const hiddenCount = total - INITIAL_VISIBLE_COUNT;
 
     return `
-      <div class="glass-card rounded-2xl p-6 shadow-xl flex flex-col justify-between transition-all duration-300 hover:border-slate-700" id="card-${device.id}">
+      <div class="glass-card rounded-2xl p-4 sm:p-5 md:p-6 shadow-xl flex flex-col justify-between transition-all duration-300 hover:border-slate-700 min-w-0 overflow-hidden" id="card-${device.id}">
         <div>
           <!-- ENCABEZADO DEL DISPOSITIVO -->
-          <div class="flex items-start justify-between mb-4 border-b border-slate-800/80 pb-3">
-            <div class="flex items-center gap-3">
-              <div class="p-2.5 rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/20">
-                <i data-lucide="${deviceIcon}" class="w-5 h-5"></i>
+          <div class="flex items-start justify-between mb-3 sm:mb-4 border-b border-slate-800/80 pb-3 gap-2">
+            <div class="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+              <div class="p-2 sm:p-2.5 rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/20 shrink-0">
+                <i data-lucide="${deviceIcon}" class="w-4 h-4 sm:w-5 sm:h-5"></i>
               </div>
-              <div>
-                <h3 class="font-bold text-slate-100 text-base leading-snug">${escapeHtml(device.name)}</h3>
-                <p class="text-xs text-slate-400">
+              <div class="min-w-0 flex-1">
+                <h3 class="font-bold text-slate-100 text-sm sm:text-base leading-snug truncate">${escapeHtml(device.name)}</h3>
+                <p class="text-[11px] sm:text-xs text-slate-400 truncate">
                   ${escapeHtml(device.manufacturer || 'Dispositivo')} ${device.model ? `• ${escapeHtml(device.model)}` : ''}
                 </p>
               </div>
             </div>
-            <span class="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-slate-800 text-slate-400 border border-slate-700/60">
+            <span class="shrink-0 px-2 sm:px-2.5 py-0.5 text-[10px] sm:text-xs font-semibold rounded-full bg-slate-800 text-slate-400 border border-slate-700/60">
               ${total} activas
             </span>
           </div>
@@ -142,20 +142,20 @@ function renderEntityRow(entity) {
   return `
     <div 
       id="row-${escapeHtml(entity.entity_id)}" 
-      class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/70 hover:bg-slate-850 transition-colors text-xs"
+      class="flex items-center justify-between p-2 sm:p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/70 hover:bg-slate-850 transition-colors text-xs gap-2 min-w-0"
     >
-      <div class="flex items-center gap-2.5 min-w-0 pr-2">
+      <div class="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1">
         <div class="text-slate-400 shrink-0">
           <i data-lucide="${icon}" class="w-4 h-4"></i>
         </div>
-        <div class="truncate">
+        <div class="min-w-0 flex-1">
           <p class="font-medium text-slate-200 truncate">${escapeHtml(entity.name)}</p>
-          <span class="text-[10px] text-slate-500 font-mono">${escapeHtml(entity.entity_id)}</span>
+          <span class="text-[10px] text-slate-500 font-mono truncate block">${escapeHtml(entity.entity_id)}</span>
         </div>
       </div>
 
-      <div class="text-right shrink-0">
-        <span id="val-${escapeHtml(entity.entity_id)}" class="font-semibold ${getValueColorClass(entity)}">
+      <div class="text-right shrink-0 max-w-[45%]">
+        <span id="val-${escapeHtml(entity.entity_id)}" class="font-semibold ${getValueColorClass(entity)} truncate block text-[11px] sm:text-xs">
           ${escapeHtml(val)}
         </span>
       </div>
@@ -228,72 +228,74 @@ function renderVehicles() {
       : 'bg-rose-500/20 text-rose-400 border border-rose-500/30';
 
     return `
-      <div class="glass-card rounded-2xl p-6 shadow-xl flex flex-col justify-between transition-all duration-300 hover:border-slate-700">
+      <div class="glass-card rounded-2xl p-4 sm:p-5 md:p-6 shadow-xl flex flex-col justify-between transition-all duration-300 hover:border-slate-700 min-w-0 overflow-hidden">
         <div>
           <!-- ENCABEZADO DEL VEHÍCULO -->
-          <div class="flex items-start justify-between mb-4 border-b border-slate-800/80 pb-3">
-            <div class="flex items-center gap-3">
-              <div class="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                <i data-lucide="car" class="w-6 h-6"></i>
+          <div class="flex items-start justify-between mb-3 sm:mb-4 border-b border-slate-800/80 pb-3 gap-2">
+            <div class="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+              <div class="p-2 sm:p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">
+                <i data-lucide="car" class="w-5 h-5 sm:w-6 sm:h-6"></i>
               </div>
-              <div>
-                <h3 class="font-bold text-slate-100 text-lg leading-snug">${escapeHtml(vehi.name)}</h3>
-                <p class="text-xs text-slate-400">
+              <div class="min-w-0 flex-1">
+                <h3 class="font-bold text-slate-100 text-base sm:text-lg leading-snug truncate">${escapeHtml(vehi.name)}</h3>
+                <p class="text-[11px] sm:text-xs text-slate-400 truncate">
                   ID: ${vehi.id} • ${escapeHtml(vehi.deviceType || 'GPS')}
                 </p>
               </div>
             </div>
-            <span class="px-2.5 py-1 text-xs font-semibold rounded-full uppercase tracking-wider ${badgeClass}">
+            <span class="shrink-0 px-2 sm:px-2.5 py-0.5 sm:py-1 text-[10px] sm:text-xs font-semibold rounded-full uppercase tracking-wider ${badgeClass}">
               ${escapeHtml(vehi.statusLabel || (isOnline ? 'En línea' : 'Desconectado'))}
             </span>
           </div>
 
           <!-- DATOS DE TELEMETRÍA -->
-          <div class="space-y-2.5">
+          <div class="space-y-2 sm:space-y-2.5">
             <!-- Dispositivo GPS -->
-            <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/70 text-xs">
-              <div class="flex items-center gap-2 text-slate-400">
-                <i data-lucide="radio" class="w-4 h-4"></i>
+            <div class="flex items-center justify-between p-2 sm:p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/70 text-xs gap-2 min-w-0">
+              <div class="flex items-center gap-1.5 sm:gap-2 text-slate-400 shrink-0">
+                <i data-lucide="radio" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
                 <span class="font-medium text-slate-300">ID Equipo GPS</span>
               </div>
-              <span class="font-mono text-slate-100 font-semibold">${escapeHtml(vehi.deviceId)}</span>
+              <span class="font-mono text-slate-100 font-semibold truncate text-right text-[11px] sm:text-xs">${escapeHtml(vehi.deviceId)}</span>
             </div>
 
             <!-- Velocidad -->
-            <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/70 text-xs">
-              <div class="flex items-center gap-2 text-slate-400">
-                <i data-lucide="gauge" class="w-4 h-4 text-sky-400"></i>
+            <div class="flex items-center justify-between p-2 sm:p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/70 text-xs gap-2 min-w-0">
+              <div class="flex items-center gap-1.5 sm:gap-2 text-slate-400 shrink-0">
+                <i data-lucide="gauge" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-sky-400"></i>
                 <span class="font-medium text-slate-300">Velocidad Actual</span>
               </div>
-              <span class="font-bold text-sky-400 text-sm">${escapeHtml(vehi.speed)}</span>
+              <span class="font-bold text-sky-400 text-xs sm:text-sm truncate text-right">${escapeHtml(vehi.speed)}</span>
             </div>
 
             <!-- Coordenadas Geográficas -->
-            <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/70 text-xs">
-              <div class="flex items-center gap-2 text-slate-400">
-                <i data-lucide="map-pin" class="w-4 h-4 text-emerald-400"></i>
+            <div class="flex items-center justify-between p-2 sm:p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/70 text-xs gap-2 min-w-0">
+              <div class="flex items-center gap-1.5 sm:gap-2 text-slate-400 shrink-0">
+                <i data-lucide="map-pin" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400"></i>
                 <span class="font-medium text-slate-300">Ubicación GPS</span>
               </div>
-              <span class="font-mono text-slate-200">${escapeHtml(vehi.locationFormatted)}</span>
+              <span class="font-mono text-slate-200 truncate text-right text-[11px] sm:text-xs max-w-[55%]">${escapeHtml(vehi.locationFormatted)}</span>
             </div>
 
             <!-- Último reporte -->
-            <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/70 text-xs">
-              <div class="flex items-center gap-2 text-slate-400">
-                <i data-lucide="clock" class="w-4 h-4"></i>
+            <div class="flex items-center justify-between p-2 sm:p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/70 text-xs gap-2 min-w-0">
+              <div class="flex items-center gap-1.5 sm:gap-2 text-slate-400 shrink-0">
+                <i data-lucide="clock" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
                 <span class="font-medium text-slate-300">Último Reporte</span>
               </div>
-              <span class="text-slate-400">${escapeHtml(vehi.lastReport)}</span>
+              <span class="text-slate-400 truncate text-right text-[11px] sm:text-xs max-w-[55%]">${escapeHtml(vehi.lastReport)}</span>
             </div>
 
             <!-- Cámaras de Video (si tiene soporte MDVR) -->
             ${vehi.hasVideo || vehi.channelCount > 0 ? `
-              <div class="flex items-center justify-between p-2.5 rounded-xl bg-indigo-950/40 border border-indigo-900/50 text-xs">
-                <div class="flex items-center gap-2 text-indigo-400">
-                  <i data-lucide="video" class="w-4 h-4"></i>
+              <div class="flex items-center justify-between p-2 sm:p-2.5 rounded-xl bg-indigo-950/40 border border-indigo-900/50 text-xs gap-2 min-w-0">
+                <div class="flex items-center gap-1.5 sm:gap-2 text-indigo-400 shrink-0">
+                  <i data-lucide="video" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
                   <span class="font-medium text-indigo-200">Cámaras MDVR</span>
                 </div>
-                <span class="font-bold text-indigo-400">${vehi.channelCount} Canales (${(vehi.channelNames || []).join(', ')})</span>
+                <span class="font-bold text-indigo-400 truncate text-right text-[11px] sm:text-xs max-w-[60%]">
+                  ${vehi.channelCount} Canales ${(vehi.channelNames && vehi.channelNames.length > 0) ? `(${vehi.channelNames.join(', ')})` : ''}
+                </span>
               </div>
             ` : ''}
           </div>
@@ -304,7 +306,7 @@ function renderVehicles() {
           ${vehi.hasVideo || vehi.channelCount > 0 ? `
             <button 
               onclick="openVideoModal('${vehi.deviceId}', '${escapeHtml(vehi.name)}', ${isOnline}, ${vehi.channelCount})" 
-              class="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 hover:to-sky-500 text-white text-xs font-semibold shadow-lg shadow-indigo-600/20 active:scale-95 transition-all cursor-pointer"
+              class="w-full flex items-center justify-center gap-2 py-2 sm:py-2.5 px-3 rounded-xl bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 hover:to-sky-500 text-white text-xs font-semibold shadow-lg shadow-indigo-600/20 active:scale-95 transition-all cursor-pointer"
             >
               <i data-lucide="video" class="w-4 h-4"></i>
               <span>${isOnline ? '🎥 Ver Cámara en Vivo' : '🎥 Ver Cámara (Offline)'}</span>
@@ -561,8 +563,8 @@ function renderChannelPills() {
     const isActive = ch === currentVideoChannel;
     const btn = document.createElement('button');
     btn.className = isActive
-      ? 'px-3 py-1 rounded-lg text-xs font-semibold bg-indigo-600 text-white shadow-sm transition-all cursor-pointer'
-      : 'px-3 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white transition-all cursor-pointer';
+      ? 'shrink-0 px-2.5 sm:px-3 py-1 rounded-lg text-xs font-semibold bg-indigo-600 text-white shadow-sm transition-all cursor-pointer'
+      : 'shrink-0 px-2.5 sm:px-3 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white transition-all cursor-pointer';
     btn.textContent = `CH ${ch}`;
     btn.onclick = () => switchVideoChannel(ch);
     pillsContainer.appendChild(btn);
