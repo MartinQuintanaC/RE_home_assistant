@@ -71,6 +71,14 @@ app.get('/api/opentraxx/vehicles', async (req, res) => {
   });
 });
 
+// 2b. Snapshot instantáneo de OpenTraxx (sin esperar petición externa)
+app.get('/api/opentraxx/snapshot', (req, res) => {
+  res.json({
+    success: true,
+    ...opentraxxClient.getSnapshot(),
+  });
+});
+
 // 3. Forzar re-sincronización de OpenTraxx
 app.post('/api/opentraxx/sync', async (req, res) => {
   await opentraxxClient.getVehiclesWithTelemetry();

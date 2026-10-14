@@ -156,10 +156,10 @@ class OpenTraxxClient {
       const chnCount = vData.chnCount || 1;
       const chnNames = vData.chnName ? vData.chnName.split(',') : [];
 
-      // Puerto HLS HTTPS oficial es 16604
+      // Reproductor nativo H5 Canvas Wasm (OpenTraxx 808GPS)
       const streamUrl = `https://opentraxx.cl:16604/hls/1_${deviceId}_${channel}_1.m3u8?JSESSIONID=${session}`;
       const playerUrl = `${config.opentraxxUrl}/808gps/open/hls/index.html?devIdno=${deviceId}&jsession=${session}&channel=${channel}&stream=1`;
-      const wsPlayerUrl = `${config.opentraxxUrl}/808gps/open/player/videoH5.html?devIdno=${deviceId}&jsession=${session}&channel=${channel}&lang=es`;
+      const wsPlayerUrl = `${config.opentraxxUrl}/808gps/open/player/video.html?devIdno=${deviceId}&jsession=${session}&index=${channel}&lang=es`;
       const wsStreamUrl = `wss://opentraxx.cl:16604/3/1?MediaType=1&Type=0&AVType=1&DevIDNO=${deviceId}&Channel=${channel}&jsession=${session}`;
 
       return {
@@ -174,6 +174,7 @@ class OpenTraxxClient {
         wsPlayerUrl,
         wsStreamUrl,
         jsession: session,
+        opentraxxUrl: config.opentraxxUrl,
       };
     } catch (err) {
       console.error(`❌ [OpenTraxx] Error al obtener stream de video para ${deviceId}:`, err.message);
@@ -186,6 +187,8 @@ class OpenTraxxClient {
       vehicles: this.vehiclesCache,
       count: this.vehiclesCache.length,
       lastSync: this.lastSyncTime || 'Pendiente',
+      jsession: this.jsession || null,
+      opentraxxUrl: config.opentraxxUrl,
     };
   }
 }
