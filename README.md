@@ -1,6 +1,6 @@
-# 🏠 Home Assistant & IoT Client (Node.js)
+# 🏠 Hub Unificado: Home Assistant & OpenTraxx (808GPS)
 
-Proyecto modular para conectar, extraer y monitorear datos en tiempo real desde **Home Assistant** (Docker Desktop) e integración de telemetría vehicular.
+Plataforma unificada en tiempo real para la integración de dispositivos IoT (**Home Assistant**) y telemetría de flota vehicular con transmisión de video en vivo (**OpenTraxx 808GPS**).
 
 ---
 
@@ -9,18 +9,32 @@ Proyecto modular para conectar, extraer y monitorear datos en tiempo real desde 
 ```text
 HomeAsis/
 ├── src/
-│   ├── config.js          # Lectura de variables de entorno y URLs (HTTP y WS)
-│   ├── ha-client.js       # Cliente WebSocket con Home Assistant y reconexión
-│   ├── event-processor.js # Procesador BFF: agrupa entidades habilitadas por dispositivo
-│   ├── server.js          # Servidor Express, API REST, SSE y hosting del frontend
-│   ├── test-connection.js # Diagnóstico de autenticación
-│   ├── fetch-states.js    # Extracción de catálogo de entidades
-│   └── listen-events.js   # Escucha en tiempo real de eventos
+│   ├── config.js          # Configuración y variables de entorno protegidas (.env)
+│   ├── ha-client.js       # Cliente WebSocket con Home Assistant (reconocimiento automático y reconexión)
+│   ├── opentraxx-client.js# Cliente API OpenTraxx (telemetría GPS y streaming MDVR)
+│   ├── event-processor.js # Procesador BFF: agrupa entidades habilitadas por dispositivo físico
+│   └── server.js          # Servidor Express, API REST unificada, SSE y hosting web
 ├── public/
-│   ├── index.html         # Dashboard web con Tailwind CSS y Lucide Icons
-│   └── app.js             # Lógica cliente: SSE y renderizado dinámico
-├── data/
-│   └── entities_dump.json # Volcado JSON de entidades
-├── .env                   # Tu configuración local protegida
-└── package.json
+│   ├── index.html         # Dashboard web responsivo (Tailwind CSS y Lucide Icons)
+│   └── app.js             # Lógica cliente: SSE, acordeones de flota vehicular y streaming sin delay
+├── .env                   # Credenciales y endpoints locales (protegido por .gitignore)
+└── package.json           # Dependencias y script de ejecución (`npm start`)
 ```
+
+---
+
+## 🚀 Puesta en Marcha
+
+1. **Instalar dependencias:**
+   ```bash
+   npm install
+   ```
+
+2. **Iniciar el servidor:**
+   ```bash
+   npm start
+   ```
+
+3. **Abrir en el navegador:**
+   - En tu PC: `http://localhost:4000`
+   - En tu red local / móvil: `http://<TU_IP_LOCAL>:4000`

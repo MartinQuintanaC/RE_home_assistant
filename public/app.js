@@ -29,18 +29,75 @@ async function ensureOpenTraxxSession() {
 }
 
 async function toggleExpandVehicle(deviceId) {
-  if (expandedVehicles.has(deviceId)) {
+  const isCurrentlyExpanded = expandedVehicles.has(deviceId);
+  if (isCurrentlyExpanded) {
     expandedVehicles.delete(deviceId);
   } else {
     expandedVehicles.add(deviceId);
     await ensureOpenTraxxSession();
   }
-  renderVehicles();
+
+  const vehi = vehiclesList.find(v => v.deviceId === deviceId);
+  const contentEl = document.getElementById(`vehi-content-${deviceId}`);
+  const chevronEl = document.getElementById(`vehi-chevron-${deviceId}`);
+  const toggleLabel = document.getElementById(`vehi-toggle-label-${deviceId}`);
+  const willBeExpanded = expandedVehicles.has(deviceId);
+
+  if (chevronEl) {
+    if (willBeExpanded) {
+      chevronEl.classList.add('rotate-180', 'bg-slate-700', 'text-white');
+    } else {
+      chevronEl.classList.remove('rotate-180', 'bg-slate-700', 'text-white');
+    }
+  }
+
+  if (toggleLabel) {
+    toggleLabel.textContent = willBeExpanded ? 'Contraer' : 'Ver cámaras';
+  }
+
+  if (contentEl && vehi) {
+    if (willBeExpanded) {
+      contentEl.innerHTML = renderVehicleExpandedContent(vehi);
+      contentEl.classList.remove('hidden');
+      refreshIcons();
+    } else {
+      contentEl.innerHTML = '';
+      contentEl.classList.add('hidden');
+    }
+  } else {
+    renderVehicles();
+  }
 }
 
 function setVehicleChannelFilter(deviceId, filter) {
   vehicleChannelFilters.set(deviceId, filter);
-  renderVehicles();
+  const vehi = vehiclesList.find(v => v.deviceId === deviceId);
+  if (!vehi) return;
+  const channelCount = vehi.channelCount || (vehi.hasVideo ? 1 : 0);
+
+  // Actualizar estilos activos de los botones de filtro
+  const buttons = document.querySelectorAll(`[data-filter-btn="${deviceId}"]`);
+  buttons.forEach(btn => {
+    const btnFilter = btn.getAttribute('data-filter-val');
+    const isActive = btnFilter === String(filter);
+    btn.className = `shrink-0 px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+      isActive
+        ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
+        : 'bg-slate-800/90 text-slate-400 hover:text-white hover:bg-slate-700'
+    }`;
+  });
+
+  // Mostrar u ocultar cada cámara sin desmontar sus iframes
+  for (let ch = 1; ch <= channelCount; ch++) {
+    const box = document.getElementById(`camera-box-${deviceId}-${ch}`);
+    if (box) {
+      if (filter === 'all' || String(filter) === String(ch)) {
+        box.style.display = '';
+      } else {
+        box.style.display = 'none';
+      }
+    }
+  }
 }
 
 function reloadSingleCamera(deviceId, channel) {
@@ -57,6 +114,17 @@ function reloadSingleCamera(deviceId, channel) {
 
 function forceConnectCamera(deviceId, channel) {
   forcedCameraStreams.add(`${deviceId}-${channel}`);
+  const vehi = vehiclesList.find(v => v.deviceId === deviceId);
+  if (vehi) {
+    const cameraBox = document.getElementById(`camera-box-${deviceId}-${channel}`);
+    if (cameraBox) {
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = renderSingleLargeCamera(vehi, channel, true);
+      cameraBox.replaceWith(tempDiv.firstElementChild);
+      refreshIcons();
+      return;
+    }
+  }
   renderVehicles();
 }
 
@@ -268,6 +336,60 @@ function renderDeviceExtraControls(device) {
 }
 
 // 3. RENDERIZAR APARTADO 2: OPENTRAXX (808GPS) - FORMATO DESPLEGABLE EN GRANDE
+
+// Actualiza únicamente los textos de telemetría sin recargar ni tocar los iframes de video activos
+function updateVehiclesTelemetryOnly() {
+  const container = document.getElementById('vehicles-container');
+  if (!container || vehiclesList.length === 0) return false;
+
+  const badgeCount = document.getElementById('badge-otx-count');
+  if (badgeCount) badgeCount.textContent = vehiclesList.length;
+
+  for (const vehi of vehiclesList) {
+    const card = document.getElementById(`vehi-card-${vehi.deviceId}`);
+    if (!card) return false; // Falta algún vehículo en el DOM, requiere renderizado completo
+
+    const isOnline = vehi.isOnline;
+    const badgeClass = isOnline
+      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+      : 'bg-rose-500/20 text-rose-400 border border-rose-500/30';
+
+    // 1. Badge de estado en el encabezado
+    const statusBadge = document.getElementById(`vehi-status-${vehi.deviceId}`);
+    if (statusBadge) {
+      statusBadge.className = `px-2 py-0.5 text-[10px] sm:text-xs font-semibold rounded-full uppercase tracking-wider ${badgeClass}`;
+      statusBadge.textContent = vehi.statusLabel || (isOnline ? 'En línea' : 'Desconectado');
+    }
+
+    // 2. Velocidad en el encabezado
+    const headerSpeed = document.getElementById(`vehi-speed-${vehi.deviceId}`);
+    if (headerSpeed) {
+      headerSpeed.textContent = isOnline ? ` • ${vehi.speed}` : '';
+    }
+
+    // 3. Telemetría dentro del desplegable (si está abierto)
+    const valSpeed = document.getElementById(`val-speed-${vehi.deviceId}`);
+    if (valSpeed) valSpeed.textContent = vehi.speed;
+
+    const valGps = document.getElementById(`val-gps-${vehi.deviceId}`);
+    if (valGps) {
+      if (vehi.googleMapsUrl) {
+        valGps.innerHTML = `<a href="${escapeHtml(vehi.googleMapsUrl)}" target="_blank" class="font-mono text-emerald-400 hover:underline truncate max-w-[55%] text-right" title="Abrir en Google Maps">${escapeHtml(vehi.locationFormatted)}</a>`;
+      } else {
+        valGps.textContent = vehi.locationFormatted;
+      }
+    }
+
+    const valReport = document.getElementById(`val-report-${vehi.deviceId}`);
+    if (valReport) valReport.textContent = vehi.lastReport;
+  }
+
+  const syncTime = document.getElementById('otx-sync-time');
+  if (syncTime) syncTime.textContent = `Actualizado ${new Date().toLocaleTimeString()}`;
+
+  return true;
+}
+
 function renderVehicles() {
   const container = document.getElementById('vehicles-container');
   const badgeCount = document.getElementById('badge-otx-count');
@@ -293,20 +415,7 @@ function renderVehicles() {
       ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
       : 'bg-rose-500/20 text-rose-400 border border-rose-500/30';
 
-    const currentFilter = vehicleChannelFilters.get(vehi.deviceId) || 'all';
     const channelCount = vehi.channelCount || (vehi.hasVideo ? 1 : 0);
-
-    // Determinar qué canales renderizar
-    let channelsToRender = [];
-    if (channelCount > 0) {
-      if (currentFilter === 'all') {
-        for (let i = 1; i <= channelCount; i++) channelsToRender.push(i);
-      } else {
-        const parsed = parseInt(currentFilter, 10);
-        if (parsed >= 1 && parsed <= channelCount) channelsToRender.push(parsed);
-        else for (let i = 1; i <= channelCount; i++) channelsToRender.push(i);
-      }
-    }
 
     return `
       <div class="glass-card rounded-2xl overflow-hidden border border-slate-800/80 shadow-xl transition-all duration-300 hover:border-slate-700/80 w-full" id="vehi-card-${vehi.deviceId}">
@@ -323,110 +432,32 @@ function renderVehicles() {
             <div class="min-w-0 flex-1">
               <div class="flex items-center gap-2 flex-wrap">
                 <h3 class="font-bold text-slate-100 text-base sm:text-lg leading-snug truncate">${escapeHtml(vehi.name)}</h3>
-                <span class="px-2 py-0.5 text-[10px] sm:text-xs font-semibold rounded-full uppercase tracking-wider ${badgeClass}">
+                <span id="vehi-status-${vehi.deviceId}" class="px-2 py-0.5 text-[10px] sm:text-xs font-semibold rounded-full uppercase tracking-wider ${badgeClass}">
                   ${escapeHtml(vehi.statusLabel || (isOnline ? 'En línea' : 'Desconectado'))}
                 </span>
               </div>
               <p class="text-[11px] sm:text-xs text-slate-400 truncate mt-0.5">
                 ID GPS: <span class="font-mono text-slate-300 font-medium">${escapeHtml(vehi.deviceId)}</span>
                 ${channelCount > 0 ? ` • <span class="text-indigo-400 font-semibold">${channelCount} Cámaras</span>` : ''}
-                ${isOnline ? ` • <span class="text-sky-400 font-medium">${escapeHtml(vehi.speed)}</span>` : ''}
+                <span id="vehi-speed-${vehi.deviceId}" class="text-sky-400 font-medium">${isOnline ? ` • ${escapeHtml(vehi.speed)}` : ''}</span>
               </p>
             </div>
           </div>
 
           <div class="flex items-center gap-2 shrink-0">
-            <span class="hidden sm:inline-block text-xs font-medium text-slate-400">
+            <span id="vehi-toggle-label-${vehi.deviceId}" class="hidden sm:inline-block text-xs font-medium text-slate-400">
               ${isExpanded ? 'Contraer' : 'Ver cámaras'}
             </span>
-            <div class="w-8 h-8 rounded-lg bg-slate-800/80 border border-slate-700/60 flex items-center justify-center text-slate-300 transition-transform duration-200 ${isExpanded ? 'rotate-180 bg-slate-700 text-white' : ''}">
+            <div id="vehi-chevron-${vehi.deviceId}" class="w-8 h-8 rounded-lg bg-slate-800/80 border border-slate-700/60 flex items-center justify-center text-slate-300 transition-transform duration-200 ${isExpanded ? 'rotate-180 bg-slate-700 text-white' : ''}">
               <i data-lucide="chevron-down" class="w-4 h-4"></i>
             </div>
           </div>
         </div>
 
         <!-- CONTENIDO EXPANDIBLE -->
-        ${isExpanded ? `
-          <div class="px-4 pb-5 sm:px-5 sm:pb-6 pt-1 border-t border-slate-800/80 space-y-4">
-            
-            <!-- BARRA DE TELEMETRÍA COMPACTA -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2">
-              <!-- Velocidad -->
-              <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/70 text-xs">
-                <div class="flex items-center gap-2 text-slate-400 shrink-0">
-                  <i data-lucide="gauge" class="w-4 h-4 text-sky-400"></i>
-                  <span class="font-medium text-slate-300">Velocidad</span>
-                </div>
-                <span class="font-bold text-sky-400">${escapeHtml(vehi.speed)}</span>
-              </div>
-
-              <!-- Ubicación GPS -->
-              <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/70 text-xs">
-                <div class="flex items-center gap-2 text-slate-400 shrink-0">
-                  <i data-lucide="map-pin" class="w-4 h-4 text-emerald-400"></i>
-                  <span class="font-medium text-slate-300">GPS</span>
-                </div>
-                ${vehi.googleMapsUrl ? `
-                  <a href="${escapeHtml(vehi.googleMapsUrl)}" target="_blank" class="font-mono text-emerald-400 hover:underline truncate max-w-[55%] text-right" title="Abrir en Google Maps">
-                    ${escapeHtml(vehi.locationFormatted)}
-                  </a>
-                ` : `
-                  <span class="font-mono text-slate-300 truncate">${escapeHtml(vehi.locationFormatted)}</span>
-                `}
-              </div>
-
-              <!-- Último reporte -->
-              <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/70 text-xs">
-                <div class="flex items-center gap-2 text-slate-400 shrink-0">
-                  <i data-lucide="clock" class="w-4 h-4 text-slate-400"></i>
-                  <span class="font-medium text-slate-300">Reporte</span>
-                </div>
-                <span class="text-slate-400 font-mono text-[11px] truncate max-w-[55%] text-right">${escapeHtml(vehi.lastReport)}</span>
-              </div>
-            </div>
-
-            <!-- FILTRO DE CANALES SI HAY MÁS DE 1 CÁMARA -->
-            ${channelCount > 1 ? `
-              <div class="flex items-center gap-2 overflow-x-auto pb-1 pt-1 no-scrollbar">
-                <span class="text-xs font-semibold text-slate-400 shrink-0 mr-1 flex items-center gap-1.5">
-                  <i data-lucide="layers" class="w-3.5 h-3.5"></i>
-                  <span>Vista:</span>
-                </span>
-                <button 
-                  onclick="setVehicleChannelFilter('${vehi.deviceId}', 'all')" 
-                  class="shrink-0 px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${currentFilter === 'all' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : 'bg-slate-800/90 text-slate-400 hover:text-white hover:bg-slate-700'}"
-                >
-                  Todas las Cámaras (${channelCount})
-                </button>
-                ${Array.from({ length: channelCount }, (_, idx) => idx + 1).map((ch) => {
-                  const isActive = String(currentFilter) === String(ch);
-                  const chLabel = (vehi.channelNames && vehi.channelNames[ch - 1]) || `CH${ch}`;
-                  return `
-                    <button 
-                      onclick="setVehicleChannelFilter('${vehi.deviceId}', '${ch}')" 
-                      class="shrink-0 px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${isActive ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : 'bg-slate-800/90 text-slate-400 hover:text-white hover:bg-slate-700'}"
-                    >
-                      ${escapeHtml(chLabel)}
-                    </button>
-                  `;
-                }).join('')}
-              </div>
-            ` : ''}
-
-            <!-- CÁMARAS APILADAS EN GRANDE (Full width, cada cámara en su recuadro grande) -->
-            ${channelCount > 0 ? `
-              <div class="space-y-4 pt-1">
-                ${channelsToRender.map((ch) => renderSingleLargeCamera(vehi, ch)).join('')}
-              </div>
-            ` : `
-              <div class="p-6 text-center rounded-2xl bg-slate-900/40 border border-slate-800/60 text-slate-400">
-                <i data-lucide="video-off" class="w-6 h-6 mx-auto mb-2 opacity-50"></i>
-                <p class="text-xs font-medium">Este vehículo no cuenta con canales de video MDVR asociados.</p>
-              </div>
-            `}
-
-          </div>
-        ` : ''}
+        <div id="vehi-content-${vehi.deviceId}" class="${isExpanded ? '' : 'hidden'}">
+          ${isExpanded ? renderVehicleExpandedContent(vehi) : ''}
+        </div>
       </div>
     `;
   }).join('');
@@ -434,7 +465,103 @@ function renderVehicles() {
   refreshIcons();
 }
 
-function renderSingleLargeCamera(vehi, ch) {
+function renderVehicleExpandedContent(vehi) {
+  const currentFilter = vehicleChannelFilters.get(vehi.deviceId) || 'all';
+  const channelCount = vehi.channelCount || (vehi.hasVideo ? 1 : 0);
+
+  return `
+    <div class="px-4 pb-5 sm:px-5 sm:pb-6 pt-1 border-t border-slate-800/80 space-y-4">
+      
+      <!-- BARRA DE TELEMETRÍA COMPACTA -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2">
+        <!-- Velocidad -->
+        <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/70 text-xs">
+          <div class="flex items-center gap-2 text-slate-400 shrink-0">
+            <i data-lucide="gauge" class="w-4 h-4 text-sky-400"></i>
+            <span class="font-medium text-slate-300">Velocidad</span>
+          </div>
+          <span id="val-speed-${vehi.deviceId}" class="font-bold text-sky-400">${escapeHtml(vehi.speed)}</span>
+        </div>
+
+        <!-- Ubicación GPS -->
+        <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/70 text-xs">
+          <div class="flex items-center gap-2 text-slate-400 shrink-0">
+            <i data-lucide="map-pin" class="w-4 h-4 text-emerald-400"></i>
+            <span class="font-medium text-slate-300">GPS</span>
+          </div>
+          <span id="val-gps-${vehi.deviceId}">
+            ${vehi.googleMapsUrl ? `
+              <a href="${escapeHtml(vehi.googleMapsUrl)}" target="_blank" class="font-mono text-emerald-400 hover:underline truncate max-w-[55%] text-right" title="Abrir en Google Maps">
+                ${escapeHtml(vehi.locationFormatted)}
+              </a>
+            ` : `
+              <span class="font-mono text-slate-300 truncate">${escapeHtml(vehi.locationFormatted)}</span>
+            `}
+          </span>
+        </div>
+
+        <!-- Último reporte -->
+        <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/70 text-xs">
+          <div class="flex items-center gap-2 text-slate-400 shrink-0">
+            <i data-lucide="clock" class="w-4 h-4 text-slate-400"></i>
+            <span class="font-medium text-slate-300">Reporte</span>
+          </div>
+          <span id="val-report-${vehi.deviceId}" class="text-slate-400 font-mono text-[11px] truncate max-w-[55%] text-right">${escapeHtml(vehi.lastReport)}</span>
+        </div>
+      </div>
+
+      <!-- FILTRO DE CANALES SI HAY MÁS DE 1 CÁMARA -->
+      ${channelCount > 1 ? `
+        <div class="flex items-center gap-2 overflow-x-auto pb-1 pt-1 no-scrollbar">
+          <span class="text-xs font-semibold text-slate-400 shrink-0 mr-1 flex items-center gap-1.5">
+            <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+            <span>Vista:</span>
+          </span>
+          <button 
+            data-filter-btn="${vehi.deviceId}"
+            data-filter-val="all"
+            onclick="setVehicleChannelFilter('${vehi.deviceId}', 'all')" 
+            class="shrink-0 px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${currentFilter === 'all' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : 'bg-slate-800/90 text-slate-400 hover:text-white hover:bg-slate-700'}"
+          >
+            Todas las Cámaras (${channelCount})
+          </button>
+          ${Array.from({ length: channelCount }, (_, idx) => idx + 1).map((ch) => {
+            const isActive = String(currentFilter) === String(ch);
+            const chLabel = (vehi.channelNames && vehi.channelNames[ch - 1]) || `CH${ch}`;
+            return `
+              <button 
+                data-filter-btn="${vehi.deviceId}"
+                data-filter-val="${ch}"
+                onclick="setVehicleChannelFilter('${vehi.deviceId}', '${ch}')" 
+                class="shrink-0 px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${isActive ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : 'bg-slate-800/90 text-slate-400 hover:text-white hover:bg-slate-700'}"
+              >
+                ${escapeHtml(chLabel)}
+              </button>
+            `;
+          }).join('')}
+        </div>
+      ` : ''}
+
+      <!-- CÁMARAS APILADAS EN GRANDE (Full width, cada cámara en su recuadro grande) -->
+      ${channelCount > 0 ? `
+        <div class="space-y-4 pt-1" id="cameras-wrapper-${vehi.deviceId}">
+          ${Array.from({ length: channelCount }, (_, idx) => idx + 1).map((ch) => {
+            const shouldBeVisible = currentFilter === 'all' || String(currentFilter) === String(ch);
+            return renderSingleLargeCamera(vehi, ch, shouldBeVisible);
+          }).join('')}
+        </div>
+      ` : `
+        <div class="p-6 text-center rounded-2xl bg-slate-900/40 border border-slate-800/60 text-slate-400">
+          <i data-lucide="video-off" class="w-6 h-6 mx-auto mb-2 opacity-50"></i>
+          <p class="text-xs font-medium">Este vehículo no cuenta con canales de video MDVR asociados.</p>
+        </div>
+      `}
+
+    </div>
+  `;
+}
+
+function renderSingleLargeCamera(vehi, ch, isVisible = true) {
   const isOnline = vehi.isOnline;
   const isForced = forcedCameraStreams.has(`${vehi.deviceId}-${ch}`);
   const chName = (vehi.channelNames && vehi.channelNames[ch - 1]) || `Cámara ${ch} (CH${ch})`;
@@ -443,7 +570,7 @@ function renderSingleLargeCamera(vehi, ch) {
     : '';
 
   return `
-    <div class="rounded-2xl bg-slate-900/95 border border-slate-800/90 overflow-hidden shadow-2xl">
+    <div id="camera-box-${vehi.deviceId}-${ch}" class="rounded-2xl bg-slate-900/95 border border-slate-800/90 overflow-hidden shadow-2xl" style="${isVisible ? '' : 'display: none;'}">
       <!-- Barra superior de la cámara individual -->
       <div class="flex items-center justify-between px-3.5 py-2.5 sm:px-4 sm:py-3 bg-slate-900 border-b border-slate-800/80 gap-2">
         <div class="flex items-center gap-2 min-w-0">
@@ -588,7 +715,10 @@ async function syncCurrentTab() {
       const data = await res.json();
       if (data.vehicles) {
         vehiclesList = data.vehicles;
-        renderVehicles();
+        if (data.jsession) opentraxxSession = data.jsession;
+        if (!updateVehiclesTelemetryOnly()) {
+          renderVehicles();
+        }
         showToast('✅ Flota OpenTraxx actualizada');
       }
     } else {
@@ -634,7 +764,11 @@ function setupSSE() {
       else if (payload.type === 'OPENTRAXX_SNAPSHOT' && payload.data?.vehicles) {
         vehiclesList = payload.data.vehicles;
         if (payload.data.jsession) opentraxxSession = payload.data.jsession;
-        renderVehicles();
+        
+        // Actualizar telemetría sin recargar ni tocar las cámaras activas
+        if (!updateVehiclesTelemetryOnly()) {
+          renderVehicles();
+        }
         updateSubtitle();
       }
 
@@ -688,165 +822,9 @@ function showToast(message) {
   }, 2500);
 }
 
-// 7. GESTIÓN DEL VISOR DE VIDEO EN VIVO (WEBSOCKET NATIVO / OPENTRAXX)
-let currentVideoDevice = null;
-let currentVideoChannel = 1;
-let currentVehicleName = '';
-let currentIsOnline = false;
-let currentChannelCount = 1;
-
-async function openVideoModal(deviceId, vehicleName, isOnline, channelCount = 1) {
-  currentVideoDevice = deviceId;
-  currentVehicleName = vehicleName;
-  currentIsOnline = isOnline;
-  currentChannelCount = channelCount || 1;
-  currentVideoChannel = 1;
-
-  const modal = document.getElementById('video-modal');
-  const titleEl = document.getElementById('video-modal-title');
-  const subtitleEl = document.getElementById('video-modal-subtitle');
-  const badgeEl = document.getElementById('video-modal-status-badge');
-  const offlineAlert = document.getElementById('video-offline-alert');
-
-  if (titleEl) titleEl.textContent = `Cámara en Vivo • ${vehicleName}`;
-  if (subtitleEl) subtitleEl.textContent = `Dispositivo GPS: ${deviceId} • ${currentChannelCount} canal(es) de video`;
-
-  if (badgeEl) {
-    if (isOnline) {
-      badgeEl.className = 'px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
-      badgeEl.textContent = 'En línea';
-      if (offlineAlert) offlineAlert.classList.add('hidden');
-    } else {
-      badgeEl.className = 'px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/30';
-      badgeEl.textContent = 'Desconectado';
-      if (offlineAlert) offlineAlert.classList.remove('hidden');
-    }
-  }
-
-  // Generar botones de canales
-  renderChannelPills();
-
-  // Abrir ventana modal
-  if (modal) modal.classList.remove('hidden');
-  refreshIcons();
-
-  // Iniciar carga del canal 1
-  loadStreamChannel(currentVideoChannel);
-}
-
-function renderChannelPills() {
-  const pillsContainer = document.getElementById('video-channel-pills');
-  if (!pillsContainer) return;
-
-  pillsContainer.innerHTML = '';
-  const count = Math.max(1, currentChannelCount);
-
-  for (let ch = 1; ch <= count; ch++) {
-    const isActive = ch === currentVideoChannel;
-    const btn = document.createElement('button');
-    btn.className = isActive
-      ? 'shrink-0 px-2.5 sm:px-3 py-1 rounded-lg text-xs font-semibold bg-indigo-600 text-white shadow-sm transition-all cursor-pointer'
-      : 'shrink-0 px-2.5 sm:px-3 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white transition-all cursor-pointer';
-    btn.textContent = `CH ${ch}`;
-    btn.onclick = () => switchVideoChannel(ch);
-    pillsContainer.appendChild(btn);
-  }
-}
-
-function switchVideoChannel(ch) {
-  currentVideoChannel = ch;
-  renderChannelPills();
-  loadStreamChannel(ch);
-}
-
-function syncLiveStream() {
-  showToast('⚡ Sincronizando al instante en vivo...');
-  loadStreamChannel(currentVideoChannel);
-}
-
-function retryCurrentChannel() {
-  loadStreamChannel(currentVideoChannel);
-}
-
-async function loadStreamChannel(channel) {
-  const iframeEl = document.getElementById('camera-iframe-player');
-  const spinner = document.getElementById('video-spinner');
-  const spinnerText = document.getElementById('video-spinner-text');
-  const offlineAlert = document.getElementById('video-offline-alert');
-  const techInfo = document.getElementById('video-stream-tech-info');
-
-  if (spinner) spinner.classList.remove('opacity-0', 'pointer-events-none');
-  if (spinnerText) spinnerText.textContent = `Conectando a canal CH${channel}...`;
-
-  try {
-    const res = await fetch(`/api/opentraxx/video/${currentVideoDevice}?channel=${channel}`);
-    const data = await res.json();
-
-    if (!data.success) {
-      if (spinnerText) spinnerText.textContent = `Error: ${data.error || 'No se pudo obtener el stream'}`;
-      return;
-    }
-
-    // Si el dispositivo está fuera de línea
-    if (!data.isOnline) {
-      if (offlineAlert) offlineAlert.classList.remove('hidden');
-      if (spinner) spinner.classList.add('opacity-0', 'pointer-events-none');
-      if (iframeEl) iframeEl.src = 'about:blank';
-      return;
-    } else {
-      if (offlineAlert) offlineAlert.classList.add('hidden');
-    }
-
-    // Cargar reproductor nativo WebSocket (videoH5 / Canvas Wasm)
-    if (iframeEl) {
-      iframeEl.onload = () => {
-        if (spinner) spinner.classList.add('opacity-0', 'pointer-events-none');
-      };
-      // Fallback para ocultar spinner si onload ya disparó
-      setTimeout(() => {
-        if (spinner) spinner.classList.add('opacity-0', 'pointer-events-none');
-      }, 2500);
-
-      iframeEl.src = data.wsPlayerUrl;
-    }
-
-    if (techInfo) {
-      techInfo.textContent = `CH${channel} • WebSocket Wasm (Tiempo Real) • MDVR ${escapeHtml(currentVehicleName)}`;
-    }
-
-  } catch (err) {
-    console.error('❌ Error al solicitar video stream:', err);
-    if (spinnerText) spinnerText.textContent = 'Error al conectar con la API de video.';
-  }
-}
-
-
-function closeVideoModal() {
-  const modal = document.getElementById('video-modal');
-  const iframeEl = document.getElementById('camera-iframe-player');
-
-  if (iframeEl) {
-    iframeEl.src = 'about:blank';
-  }
-
-  if (modal) modal.classList.add('hidden');
-}
-
-// Cerrar con Escape o haciendo clic fuera del modal
-window.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') closeVideoModal();
-});
-
 document.addEventListener('DOMContentLoaded', async () => {
   refreshIcons();
   switchTab('ha');
   setupSSE();
   await ensureOpenTraxxSession();
-
-  const modal = document.getElementById('video-modal');
-  if (modal) {
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) closeVideoModal();
-    });
-  }
 });
