@@ -10,47 +10,58 @@
   <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
+    html, body {
+      overflow-x: hidden;
+      max-width: 100vw;
+    }
     .glass-card {
       background: rgba(30, 41, 59, 0.7);
       backdrop-filter: blur(12px);
       border: 1px solid rgba(255, 255, 255, 0.08);
     }
+    .scrollbar-none::-webkit-scrollbar {
+      display: none;
+    }
+    .scrollbar-none {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
   </style>
 </head>
 
 <body
-  class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-sky-500 selection:text-white">
+  class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-sky-500 selection:text-white overflow-x-hidden">
 
   <!-- BARRA SUPERIOR -->
-  <header class="border-b border-slate-800/80 bg-slate-900/60 backdrop-blur sticky top-0 z-50">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-      <div class="flex items-center gap-3">
+  <header class="border-b border-slate-800/80 bg-slate-900/60 backdrop-blur sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-2 min-w-0">
+      <div class="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
         <div
-          class="p-2.5 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 text-white shadow-lg shadow-sky-500/20">
-          <i data-lucide="layers" class="w-6 h-6"></i>
+          class="p-2 sm:p-2.5 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 text-white shadow-lg shadow-sky-500/20 shrink-0">
+          <i data-lucide="layers" class="w-5 h-5 sm:w-6 sm:h-6"></i>
         </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <h1 class="font-bold text-lg leading-tight tracking-tight">Hub de Dispositivos Multi-Plataforma</h1>
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+            <h1 class="font-bold text-sm sm:text-base md:text-lg leading-tight tracking-tight truncate">Hub de Dispositivos Multi-Plataforma</h1>
             <span
-              class="px-2 py-0.5 text-[10px] font-semibold tracking-wider uppercase rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+              class="hidden sm:inline-flex px-1.5 py-0.5 text-[9px] sm:text-[10px] font-semibold tracking-wider uppercase rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shrink-0">
               HA + 808GPS
             </span>
           </div>
-          <p class="text-xs text-slate-400" id="header-subtitle">Cargando dispositivos...</p>
+          <p class="text-[11px] sm:text-xs text-slate-400 truncate" id="header-subtitle">Cargando dispositivos...</p>
         </div>
       </div>
 
       <!-- Acciones de cabecera -->
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2 sm:gap-3 shrink-0">
         <button id="btn-sync" onclick="syncCurrentTab()" title="Sincronizar cambios desde ambas APIs"
-          class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-xs text-slate-300 border border-slate-700/60 transition-all cursor-pointer active:scale-95">
+          class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-xs text-slate-300 border border-slate-700/60 transition-all cursor-pointer active:scale-95 shrink-0">
           <i id="sync-icon" data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
           <span class="hidden sm:inline">Sincronizar</span>
         </button>
 
         <div id="connection-badge"
-          class="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-emerald-950/80 text-emerald-400 border border-emerald-800/60 shadow-sm transition-all duration-300">
+          class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-medium bg-emerald-950/80 text-emerald-400 border border-emerald-800/60 shadow-sm transition-all duration-300 shrink-0">
           <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
           <span id="connection-text">En Vivo</span>
         </div>
@@ -58,25 +69,27 @@
     </div>
 
     <!-- SELECTOR DE LOS 2 APARTADOS (PESTAÑAS) -->
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 pt-1 pb-3">
-      <div class="flex items-center gap-2 p-1 rounded-xl bg-slate-900/80 border border-slate-800/80 w-fit">
+    <div class="max-w-6xl mx-auto px-3 sm:px-6 pt-1 pb-3">
+      <div class="grid grid-cols-2 sm:flex items-center gap-1.5 sm:gap-2 p-1 rounded-xl bg-slate-900/80 border border-slate-800/80 w-full sm:w-fit">
         <button id="tab-btn-ha" onclick="switchTab('ha')"
-          class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer bg-sky-500 text-white shadow-sm">
-          <i data-lucide="home" class="w-4 h-4"></i>
-          <span>1. Domótica IoT (Home Assistant)</span>
-          <span id="badge-ha-count" class="px-1.5 py-0.2 rounded-full bg-sky-600 text-[10px]">0</span>
+          class="flex items-center justify-center sm:justify-start gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer bg-sky-500 text-white shadow-sm min-w-0">
+          <i data-lucide="home" class="w-4 h-4 shrink-0"></i>
+          <span class="truncate sm:hidden">1. Home Assistant</span>
+          <span class="truncate hidden sm:inline">1. Domótica IoT (Home Assistant)</span>
+          <span id="badge-ha-count" class="px-1.5 py-0.2 rounded-full bg-sky-600 text-[10px] shrink-0">0</span>
         </button>
 
         <button id="tab-btn-otx" onclick="switchTab('otx')"
-          class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
-          <i data-lucide="navigation" class="w-4 h-4"></i>
-          <span>2. Flota & Telemetría GPS (OpenTraxx)</span>
-          <span id="badge-otx-count" class="px-1.5 py-0.2 rounded-full bg-slate-800 text-[10px]">0</span>
+          class="flex items-center justify-center sm:justify-start gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition-all cursor-pointer min-w-0">
+          <i data-lucide="navigation" class="w-4 h-4 shrink-0"></i>
+          <span class="truncate sm:hidden">2. OpenTraxx GPS</span>
+          <span class="truncate hidden sm:inline">2. Flota & Telemetría GPS (OpenTraxx)</span>
+          <span id="badge-otx-count" class="px-1.5 py-0.2 rounded-full bg-slate-800 text-[10px] shrink-0">0</span>
         </button>
 
         <button id="tab-btn-both" onclick="switchTab('both')"
-          class="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
-          <i data-lucide="columns" class="w-3.5 h-3.5"></i>
+          class="col-span-2 hidden md:flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
+          <i data-lucide="columns" class="w-3.5 h-3.5 shrink-0"></i>
           <span>Ver Ambos</span>
         </button>
       </div>
@@ -84,37 +97,35 @@
   </header>
 
   <!-- CONTENIDO PRINCIPAL: APARTADOS -->
-  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 space-y-8">
+  <main class="flex-1 max-w-6xl w-full mx-auto px-3 sm:px-6 py-4 sm:py-6 space-y-6 sm:space-y-8 min-w-0">
 
     <!-- APARTADO 1: HOME ASSISTANT -->
     <section id="section-ha" class="space-y-4">
-      <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-slate-800/80 pb-2">
         <div class="flex items-center gap-2">
-          <i data-lucide="cpu" class="w-5 h-5 text-sky-400"></i>
-          <h2 class="text-base font-bold text-slate-100 uppercase tracking-wider">Apartado 1: Dispositivos IoT (Home
-            Assistant)</h2>
+          <i data-lucide="cpu" class="w-5 h-5 text-sky-400 shrink-0"></i>
+          <h2 class="text-sm sm:text-base font-bold text-slate-100 uppercase tracking-wider">Apartado 1: Dispositivos IoT (Home Assistant)</h2>
         </div>
-        <span class="text-xs text-slate-400">Conexión Docker :3000</span>
+        <span class="text-[11px] sm:text-xs text-slate-400">Conexión Docker :3000</span>
       </div>
 
-      <div id="devices-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div id="devices-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
         <!-- Los apartados de Home Assistant se renderizan aquí -->
       </div>
     </section>
 
     <!-- APARTADO 2: OPENTRAXX (808GPS) -->
     <section id="section-otx" class="space-y-4">
-      <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-slate-800/80 pb-2">
         <div class="flex items-center gap-2">
-          <i data-lucide="map-pin" class="w-5 h-5 text-emerald-400"></i>
-          <h2 class="text-base font-bold text-slate-100 uppercase tracking-wider">Apartado 2: Flota & GPS (OpenTraxx
-            808GPS)</h2>
+          <i data-lucide="map-pin" class="w-5 h-5 text-emerald-400 shrink-0"></i>
+          <h2 class="text-sm sm:text-base font-bold text-slate-100 uppercase tracking-wider">Apartado 2: Flota & GPS (OpenTraxx 808GPS)</h2>
         </div>
-        <span class="text-xs text-slate-400" id="otx-sync-time">Último reporte en nube</span>
+        <span class="text-[11px] sm:text-xs text-slate-400" id="otx-sync-time">Último reporte en nube</span>
       </div>
 
-      <div id="vehicles-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Los vehículos de OpenTraxx se renderizan aquí -->
+      <div id="vehicles-container" class="space-y-4 w-full">
+        <!-- Los vehículos de OpenTraxx desplegables se renderizan aquí -->
       </div>
     </section>
 

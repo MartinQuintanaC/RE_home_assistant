@@ -98,6 +98,11 @@ class OpenTraxxClient {
         const speedKmh = statusObj?.sp !== undefined ? Math.round(statusObj.sp / 10) : 0;
         const lastGpsTime = statusObj?.gt || 'Sin reporte reciente';
 
+        const devInfo = v.dl && v.dl.length > 0 ? v.dl[0] : null;
+        const channelCount = devInfo?.cc || 0;
+        const channelNames = devInfo?.cn ? devInfo.cn.split(',') : [];
+        const hasVideo = channelCount > 0;
+
         detailedVehicles.push({
           id: v.id,
           name: v.nm || `Vehículo #${v.id}`,
@@ -110,7 +115,10 @@ class OpenTraxxClient {
           locationFormatted: (lat && lng) ? `${lat.toFixed(5)}, ${lng.toFixed(5)}` : 'No disponible',
           googleMapsUrl: (lat && lng) ? `https://www.google.com/maps?q=${lat},${lng}` : null,
           lastReport: lastGpsTime,
-          deviceType: 'GPS Vehicular / Flota',
+          deviceType: hasVideo ? `MDVR / Cámara (${channelCount} CH)` : 'GPS Vehicular / Flota',
+          channelCount,
+          channelNames,
+          hasVideo,
         });
       }
 
@@ -125,11 +133,62 @@ class OpenTraxxClient {
     }
   }
 
+  // 3. Obtener URL de streaming HLS y datos de canal de video del dispositivo
+  async getVideoStreamInfo(deviceId, channel = 1) {
+    let session = await this.ensureSession();
+    if (!session) {
+      return { success: false, error: 'Sesión no disponible' };
+    }
+
+    try {
+      let vUrl = `${config.opentraxxUrl}/StandardApiAction_getVideoDevice.action?jsession=${session}&devIdno=${deviceId}`;
+      let vRes = await fetch(vUrl, { headers: { 'Accept': 'application/json' } });
+      let vData = await vRes.json();
+
+      if (vData.result === 5) {
+        session = await this.login();
+        vUrl = `${config.opentraxxUrl}/StandardApiAction_getVideoDevice.action?jsession=${session}&devIdno=${deviceId}`;
+        vRes = await fetch(vUrl, { headers: { 'Accept': 'application/json' } });
+        vData = await vRes.json();
+      }
+
+      const isOnline = vData.isOnline === 1;
+      const chnCount = vData.chnCount || 1;
+      const chnNames = vData.chnName ? vData.chnName.split(',') : [];
+
+      // Reproductor nativo H5 Canvas Wasm (OpenTraxx 808GPS)
+      const streamUrl = `https://opentraxx.cl:16604/hls/1_${deviceId}_${channel}_1.m3u8?JSESSIONID=${session}`;
+      const playerUrl = `${config.opentraxxUrl}/808gps/open/hls/index.html?devIdno=${deviceId}&jsession=${session}&channel=${channel}&stream=1`;
+      const wsPlayerUrl = `${config.opentraxxUrl}/808gps/open/player/video.html?devIdno=${deviceId}&jsession=${session}&index=${channel}&lang=es`;
+      const wsStreamUrl = `wss://opentraxx.cl:16604/3/1?MediaType=1&Type=0&AVType=1&DevIDNO=${deviceId}&Channel=${channel}&jsession=${session}`;
+
+      return {
+        success: true,
+        deviceId,
+        channel: parseInt(channel, 10),
+        isOnline,
+        chnCount,
+        chnNames,
+        streamUrl,
+        playerUrl,
+        wsPlayerUrl,
+        wsStreamUrl,
+        jsession: session,
+        opentraxxUrl: config.opentraxxUrl,
+      };
+    } catch (err) {
+      console.error(`❌ [OpenTraxx] Error al obtener stream de video para ${deviceId}:`, err.message);
+      return { success: false, error: err.message };
+    }
+  }
+
   getSnapshot() {
     return {
       vehicles: this.vehiclesCache,
       count: this.vehiclesCache.length,
       lastSync: this.lastSyncTime || 'Pendiente',
+      jsession: this.jsession || null,
+      opentraxxUrl: config.opentraxxUrl,
     };
   }
 }
